@@ -12,7 +12,7 @@ public class LevelManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        LoadLevel();
     }
 
     public void LoadLevel()
@@ -26,7 +26,7 @@ public class LevelManager : MonoBehaviour
             Destroy(levelObject);
 
         levelObject = Instantiate(levels[lvl].LevelPrefab);
-
+        GetComponent<PathFinder>().GenerateGraph(levelObject.GetComponent<MeshFilter>().mesh);
     }
 
     // Update is called once per frame
