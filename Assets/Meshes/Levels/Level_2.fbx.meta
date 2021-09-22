@@ -7,13 +7,28 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: EnemyForcefields
+    second: {fileID: 2100000, guid: 7a1c7a8bf98939644950b61a6c63d931, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Ground
+    second: {fileID: 2100000, guid: 7774b289f5649694a8a6b4ced168afc6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ground.002
     second: {fileID: 2100000, guid: 7774b289f5649694a8a6b4ced168afc6, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Obstacles
     second: {fileID: 2100000, guid: 8972fcedf1f6e5240b0e75f971678a7a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PlayerForcefields
+    second: {fileID: 2100000, guid: 9c2e1221c47a626449e4a12fc31397fa, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

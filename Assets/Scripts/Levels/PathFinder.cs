@@ -1,41 +1,63 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class PathFinder : MonoBehaviour
 {
-    public class Connection
-    {
-        public Node target;
-        public float length = 1;
-    }
-
     public class Node
     {
         public Vector3 position;
         public Vector3 up;
-        public List<Connection> connections;
+        public List<Node> connections;
         public int type = 0;
 
         public Node()
         {
-            connections = new List<Connection>();
+            connections = new List<Node>();
         }
     }
 
-    public List<Node> nodes;
+    public struct Face
+    {
+        public int[] vertices;
+
+        public Face(int a, int b, int c, int d)
+        {
+            vertices = new int[] { a, b, c, d };
+        }
+    }
+
+    public enum SearchAlgo
+    {
+        Dijkstra,
+        AStar
+    }
+
+    public List<Node> graph;
+    public Mesh previewNodeMesh;
+    public Mesh previewLinkMesh;
+    public SearchAlgo searchMode;
+
+    private List<Node> testPath;
+
+    private Mesh graphPreview;
 
     public void GenerateGraph(Mesh mesh)
     {
-        nodes = new List<Node>();
+        graph = new List<Node>();
 
-        SubMeshDescriptor subMesh = mesh.GetSubMesh(0);
         int[] indices = mesh.GetIndices(0);
 
-        Debug.Log(indices.Length / 4);
+        List<Color32> colors = new List<Color32>();
 
-        List<int> nodeQuadIndex = new List<int>();
+        mesh.GetColors(colors);
+
+        List<Face> nodeFace = new List<Face>();
 
         for (int i=0;i< indices.Length; i += 4)
         {
@@ -51,58 +73,280 @@ public class PathFinder : MonoBehaviour
             normal += mesh.normals[indices[i]];
             normal.Normalize();
 
-            nodes.Add(new Node { 
-                position = center + normal * 0.3f, 
-                up = normal 
+            int type = 0;
+            if (mesh.colors32.Length > 0)
+            {
+                Color32 col = mesh.colors32[indices[i]];
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 1]],0.5f);
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 2]],0.5f);
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 3]],0.5f);
+
+                if (col.r > 225)
+                    type = 1;
+                else if (col.g > 225)
+                    type = 2;
+            }
+            
+
+            graph.Add(new Node { 
+                position = center + normal * 0.35f, 
+                up = normal ,
+                type = type
             });
 
-            nodeQuadIndex.Add(i);
+            nodeFace.Add(new Face(indices[i], indices[i+1], indices[i+2], indices[i+3]));
         }
 
-        for(int i = 0; i < nodes.Count; i++)
+        for(int i = 0; i < graph.Count; i++)
         {
-            for (int t = 0; t < nodes.Count; t++)
+            for (int t = 0; t < graph.Count; t++)
             {
                 if (t == i) continue;
-                Vector3 dir = nodes[t].position - nodes[i].position;
-                if (dir.sqrMagnitude > 9) continue;
-                if (Physics.Raycast(nodes[i].position, dir, dir.magnitude, 1 << 6)) continue;
+                Vector3 dir = graph[t].position - graph[i].position;
+                if (dir.sqrMagnitude > 12) continue;
+                if (Physics.SphereCast(new Ray(graph[i].position, dir),0.1f, dir.magnitude, (1 << 6) | (1 << 8))) continue;
 
-                nodes[i].connections.Add(new Connection { length = dir.sqrMagnitude, target = nodes[t] });
+                for(int va = 0; va < 4; va++)
+                {
+                    for (int vb = 0; vb < 4; vb++)
+                    {
+                        if(nodeFace[i].vertices[va] == nodeFace[t].vertices[vb])
+                        {
+                            //nodes[i].connections.Add(new Connection { length = dir.sqrMagnitude, target = nodes[t] });
+                            graph[i].connections.Add(graph[t]);
+                            continue;
+                        }
+                        else if(mesh.vertices[nodeFace[i].vertices[va]] == mesh.vertices[nodeFace[t].vertices[vb]])
+                        {
+                            //nodes[i].connections.Add(new Connection { length = dir.sqrMagnitude, target = nodes[t] });
+                            graph[i].connections.Add(graph[t]);
+                            continue;
+                        }
+                    }
+                }
+
             }
         }
 
-        Debug.Log(nodes.Count);
+        GeneratePreview();
+    }
+
+    public Mesh CopyMesh(Mesh mesh,Color col)
+    {
+        Mesh newMesh = new Mesh();
+        newMesh.vertices = mesh.vertices;
+        newMesh.triangles = mesh.triangles;
+        newMesh.normals = mesh.normals;
+        newMesh.SetColors(Enumerable.Repeat(col, newMesh.vertexCount).ToList());
+        return newMesh;
+    }
+
+    public void GeneratePreview()
+    {
+        graphPreview = new Mesh();
+        graphPreview.indexFormat = IndexFormat.UInt32;
+
+        List<CombineInstance> meshes = new List<CombineInstance>();
+
+        Mesh blackNode = CopyMesh(previewNodeMesh, Color.black);
+        Mesh redNode = CopyMesh(previewNodeMesh, Color.red);
+        Mesh greenNode = CopyMesh(previewNodeMesh, Color.green);
+
+        Mesh blackLink = CopyMesh(previewLinkMesh, Color.black);
+        Mesh redLink = CopyMesh(previewLinkMesh, Color.red);
+        Mesh greenLink = CopyMesh(previewLinkMesh, Color.green);
+
+        for (int i=0;i<graph.Count;i++)
+        {
+            Mesh nodeMesh = blackNode;
+            Mesh linkMesh = blackLink;
+            switch (graph[i].type)
+            {
+                case 1: nodeMesh = redNode; linkMesh = redLink; break;
+                case 2: nodeMesh = greenNode; linkMesh = greenLink; break;
+            }
+
+            meshes.Add(new CombineInstance { mesh = nodeMesh, transform = Matrix4x4.TRS(graph[i].position, Quaternion.identity, new Vector3(0.1f, 0.1f, 0.1f)) });
+
+            for(int l = 0; l < graph[i].connections.Count; l++)
+            {
+                Vector3 dir = graph[i].connections[l].position - graph[i].position;
+                meshes.Add(new CombineInstance { mesh = linkMesh, transform = Matrix4x4.TRS(graph[i].position, Quaternion.LookRotation(dir, graph[i].up), new Vector3(0.5f,0.5f, dir.magnitude/2)) });
+            }
+        }
+
+        graphPreview.CombineMeshes(meshes.ToArray());
+
+        GetComponent<MeshFilter>().mesh = graphPreview;
+
+
+    }
+
+    public List<Node> GetShortestPath(Node start, Node end, int type = 0)
+    {
+        switch (searchMode)
+        {
+            case SearchAlgo.Dijkstra: return GetShortestPathDijkstra(start, end,type);
+            case SearchAlgo.AStar: return GetShortestPathAStart(start, end, type);
+        }
+        return null;
+    }
+
+    public List<Node> GetShortestPathDijkstra(Node start, Node end, int type = 0)
+    {
+        List<Node> path = new List<Node>();
+
+        if(start == end)
+        {
+            path.Add(start);
+            return path;
+        }
+
+        List<Node> unvisited = graph.ToList();
+        Dictionary<Node, Node> visited = new Dictionary<Node, Node>();
+
+        List<float> values = Enumerable.Repeat(float.MaxValue, unvisited.Count).ToList();
+        Dictionary<Node, float> distances = graph.Zip(values, (k, v) => new { k, v })
+                                            .ToDictionary(x => x.k, x => x.v); ;
+
+        distances[start] = 0;
+        while (unvisited.Count != 0)
+        {
+            unvisited = unvisited.OrderBy(node => distances[node]).ToList();
+            Node current = unvisited[0];
+            unvisited.Remove(current);
+
+            if (current == end)
+            {
+                while (visited.ContainsKey(current))
+                {
+                    path.Insert(0, current);
+                    current = visited[current];
+                }
+
+                path.Insert(0, current);
+                break;
+            }
+
+            for (int i = 0; i < current.connections.Count; i++)
+            {
+                Node neighbor = current.connections[i];
+                float length = Vector3.Distance(current.position, neighbor.position);
+
+                if(type != 0 && neighbor.type != 0 && neighbor.type != type)
+                    length *= 2;
+
+                float alt = distances[current] + length;
+
+                if (alt < distances[neighbor])
+                {
+                    distances[neighbor] = alt;
+                    visited[neighbor] = current;
+                }
+            }
+        }
+
+        return path;
+    }
+
+    public List<Node> GetShortestPathAStart(Node start, Node end, int type = 0)
+    {
+        
+
+        return null;
+    }
+
+    public static float Heuristic(Node a, Node b)
+    {
+        return Mathf.Abs(a.position.x - b.position.x) + Mathf.Abs(a.position.y - b.position.y) + Mathf.Abs(a.position.z - b.position.z);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-       
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKey(KeyCode.Return))
+        {
+            testPath = GetShortestPath(graph[Random.Range(0, graph.Count - 1)], graph[Random.Range(0, graph.Count - 1)]);
+
+            List<Vector3> positions = new List<Vector3>();
+            foreach (Node node in testPath)
+                positions.Add(node.position);
+
+            GetComponent<LineRenderer>().positionCount = positions.Count;
+            GetComponent<LineRenderer>().SetPositions(positions.ToArray());
+        }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
+#if UNITY_EDITOR
 
-        if(nodes != null)
+    public static void DrawThickLine(Vector3 start, Vector3 end, float thickness)
+    {
+        Camera c = Camera.current;
+        if (c == null) return;
+
+        // Only draw on normal cameras
+        if (c.clearFlags == CameraClearFlags.Depth || c.clearFlags == CameraClearFlags.Nothing)
         {
-            foreach (Node node in nodes)
+            return;
+        }
+
+        // Only draw the line when it is the closest thing to the camera
+        // (Remove the Z-test code and other objects will not occlude the line.)
+        var prevZTest = Handles.zTest;
+        Handles.zTest = CompareFunction.LessEqual;
+
+        Handles.color = Gizmos.color;
+        Handles.DrawAAPolyLine(thickness * 10, new Vector3[] { start, end });
+
+        Handles.zTest = prevZTest;
+    }
+
+    /*private void OnDrawGizmos()
+    {
+        //Gizmos.color = Color.red;
+        Handles.zTest = CompareFunction.LessEqual;
+
+        if(graph != null)
+        {
+            foreach (Node node in graph)
             {
+                switch (node.type)
+                {
+                    case 0:Gizmos.color = Color.black;break;
+                    case 1:Gizmos.color = Color.red;break;
+                    case 2:Gizmos.color = Color.green;break;
+                }
+                Handles.color = Gizmos.color;
                 Gizmos.DrawWireSphere(node.position, 0.1f);
 
-                foreach(Connection connection in node.connections)
+                foreach(Node connection in node.connections)
                 {
-                    Gizmos.DrawLine(node.position, connection.target.position);
+                    //Gizmos.DrawLine(node.position, connection.position);
+                    Handles.DrawLine(node.position, connection.position);
                 }
             }
         }
+
+        if(testPath != null && testPath.Count>1)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(testPath[0].position, 0.2f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(testPath.Last().position, 0.2f);
+
+            Gizmos.color = Color.blue;
+            for (int i=0;i<testPath.Count-1;i++)
+            {
+                DrawThickLine(testPath[i].position, testPath[i+1].position, 1);
+            }
+        }
         
-    }
+    }*/
+#endif
 }
