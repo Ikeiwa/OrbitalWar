@@ -270,7 +270,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cbdabab3a37c02947b56706dafa30b5f, type: 2}
   - {fileID: 11400000, guid: 6b7bec1d2ee44594f8422771d738d297, type: 2}
   - {fileID: 11400000, guid: 3a0b68915aac09747b15d5fc062b50e6, type: 2}
-  currentLevel: 2
+  currentLevel: 1
   playerPrefab: {fileID: 3316346084369519847, guid: aa2fa9121b5a8ff4b91136aa085c43a4, type: 3}
 --- !u!4 &1112027307
 Transform:
@@ -293,7 +293,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1112027304}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
