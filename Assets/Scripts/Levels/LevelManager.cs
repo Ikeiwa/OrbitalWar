@@ -53,6 +53,15 @@ public class LevelManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Keypad1))
+            LoadLevel(0);
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+            LoadLevel(1);
+        if (Input.GetKeyDown(KeyCode.Keypad3))
+            LoadLevel(2);
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+            LoadLevel(3);
+        if (Input.GetKeyDown(KeyCode.Keypad5))
+            LoadLevel(4);
     }
 }
