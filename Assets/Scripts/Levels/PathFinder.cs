@@ -179,7 +179,7 @@ public class PathFinder : MonoBehaviour
         graphPreview.CombineMeshes(meshes.ToArray());
 
         GetComponent<MeshFilter>().mesh = graphPreview;
-
+        GetComponent<MeshRenderer>().enabled = false;
 
     }
 
@@ -257,13 +257,13 @@ public class PathFinder : MonoBehaviour
                 float length = Vector3.Distance(current.position, neighbor.position);
 
                 if(type != 0 && neighbor.type != 0 && neighbor.type != type)
-                    length *= 2;
+                    length *= 4;
 
-                float alt = distances[current] + length;
+                float other = distances[current] + length;
 
-                if (alt < distances[neighbor])
+                if (other < distances[neighbor])
                 {
-                    distances[neighbor] = alt;
+                    distances[neighbor] = other;
                     visited[neighbor] = current;
                 }
             }

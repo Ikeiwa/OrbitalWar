@@ -28,18 +28,29 @@ public class Enemy : MonoBehaviour
                 PathFinder.Node target = path[currentNode];
                 PathFinder.Node current = path[currentNode-1];
 
+                float trueSpeed = speed;
 
-                transform.Translate((target.position - transform.position).normalized * speed * Time.deltaTime, Space.World);
+                if (target.type == 2 || current.type == 2)
+                    trueSpeed = speed * 2;
+                else if (target.type == 1 || current.type == 1)
+                    trueSpeed = speed / 2;
+
+                    transform.Translate((target.position - transform.position).normalized * trueSpeed * Time.deltaTime, Space.World);
 
 
                 Quaternion endRot = Quaternion.LookRotation(target.position - current.position, target.up);
 
 
-                transform.rotation = Quaternion.Lerp(transform.rotation, endRot, Time.deltaTime* speed);
+                transform.rotation = Quaternion.Lerp(transform.rotation, endRot, Time.deltaTime* trueSpeed);
 
                 if((target.position- transform.position).sqrMagnitude < 0.32f)
                     currentNode++;
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            GetComponent<LineRenderer>().enabled = !GetComponent<LineRenderer>().enabled;
         }
     }
 
@@ -49,7 +60,7 @@ public class Enemy : MonoBehaviour
         {
             PathFinder.Node start = PathFinder.instance.GetClosestNode(transform.position);
             PathFinder.Node end = PathFinder.instance.GetClosestNode(player.transform.position+player.transform.up);
-            yield return PathFinder.instance.GetShortestPath(start, end,(newPath) => { path = newPath; } ,1);
+            yield return PathFinder.instance.GetShortestPath(start, end,(newPath) => { path = newPath; } ,2);
             currentNode = 1;
 
             List<Vector3> positions = new List<Vector3>();
