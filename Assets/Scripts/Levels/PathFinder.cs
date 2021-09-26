@@ -46,6 +46,7 @@ public class PathFinder : MonoBehaviour
     private List<Node> testPath;
 
     private Mesh graphPreview;
+    public static PathFinder instance;
 
     public void GenerateGraph(Mesh mesh)
     {
@@ -182,24 +183,46 @@ public class PathFinder : MonoBehaviour
 
     }
 
-    public List<Node> GetShortestPath(Node start, Node end, int type = 0)
+    public Node GetClosestNode(Vector3 pos)
+    {
+        Node closest = null;
+        float minDist = float.MaxValue;
+
+        foreach(Node node in graph)
+        {
+            float dist = (node.position - pos).sqrMagnitude;
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = node;
+            }
+        }
+
+        return closest;
+    }
+
+    public IEnumerator GetShortestPath(Node start, Node end, System.Action<List<Node>> callback, int type = 0)
     {
         switch (searchMode)
         {
-            case SearchAlgo.Dijkstra: return GetShortestPathDijkstra(start, end,type);
-            case SearchAlgo.AStar: return GetShortestPathAStart(start, end, type);
+            case SearchAlgo.Dijkstra: 
+                yield return GetShortestPathDijkstra(start, end,(path) => { callback(path); } ,type); 
+                break;
+            case SearchAlgo.AStar: 
+                yield return GetShortestPathAStart(start, end, (path) => { callback(path); }, type); 
+                break;
         }
-        return null;
+        yield return null;
     }
 
-    public List<Node> GetShortestPathDijkstra(Node start, Node end, int type = 0)
+    public IEnumerator GetShortestPathDijkstra(Node start, Node end, System.Action<List<Node>> callback, int type = 0)
     {
         List<Node> path = new List<Node>();
 
         if(start == end)
         {
             path.Add(start);
-            return path;
+            callback(path);
         }
 
         List<Node> unvisited = graph.ToList();
@@ -244,21 +267,30 @@ public class PathFinder : MonoBehaviour
                     visited[neighbor] = current;
                 }
             }
+            yield return null;
         }
 
-        return path;
+        yield return null;
+        callback(path);
     }
 
-    public List<Node> GetShortestPathAStart(Node start, Node end, int type = 0)
+    public IEnumerator GetShortestPathAStart(Node start, Node end, System.Action<List<Node>> callback, int type = 0)
     {
-        
-
-        return null;
+        callback(null);
+        yield return null;
     }
 
     public static float Heuristic(Node a, Node b)
     {
         return Mathf.Abs(a.position.x - b.position.x) + Mathf.Abs(a.position.y - b.position.y) + Mathf.Abs(a.position.z - b.position.z);
+    }
+
+    private void Awake()
+    {
+        if (instance != null)
+            Destroy(this);
+
+        instance = this;
     }
 
     // Start is called before the first frame update
@@ -270,7 +302,7 @@ public class PathFinder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Return))
+        /*if (Input.GetKey(KeyCode.Return))
         {
             testPath = GetShortestPath(graph[Random.Range(0, graph.Count - 1)], graph[Random.Range(0, graph.Count - 1)]);
 
@@ -280,6 +312,11 @@ public class PathFinder : MonoBehaviour
 
             GetComponent<LineRenderer>().positionCount = positions.Count;
             GetComponent<LineRenderer>().SetPositions(positions.ToArray());
+        }*/
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            GetComponent<MeshRenderer>().enabled = !GetComponent<MeshRenderer>().enabled;
         }
     }
 
