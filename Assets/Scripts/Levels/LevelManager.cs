@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
     public int currentLevel = 0;
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
+    public BoidsFlock boidsFlock;
 
 
     private GameObject player;
@@ -48,6 +49,8 @@ public class LevelManager : MonoBehaviour
             enemy.transform.position = node.position;
             enemy.transform.rotation = Quaternion.AngleAxis(Random.Range(0, 360), node.up);
         }
+
+        boidsFlock.UpdateScene();
     }
 
     // Update is called once per frame
