@@ -12,6 +12,7 @@ Shader "Unlit/VolumeShader"
         Blend One OneMinusSrcAlpha
         LOD 100
         Cull off
+        ZTest off
 
         Pass
         {
@@ -30,6 +31,7 @@ Shader "Unlit/VolumeShader"
             struct appdata
             {
                 float4 vertex : POSITION;
+                float3 normal : NORMAL;
             };
 
             struct v2f
@@ -49,11 +51,15 @@ Shader "Unlit/VolumeShader"
                 v2f o;
 
                 // Vertex in object space this will be the starting point of raymarching
-                o.objectVertex = v.vertex;
-
+                float3 objectCam = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos,1)).xyz;
                 // Calculate vector from camera to vertex in world space
-                float3 worldVertex = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.vectorToSurface = worldVertex - _WorldSpaceCameraPos;
+
+
+
+                float side = round(dot(v.normal,v.vertex.xyz - objectCam)/2+0.5f);
+
+                o.objectVertex = lerp(v.vertex.xyz,objectCam,side);
+                o.vectorToSurface = v.vertex.xyz - objectCam;
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
@@ -72,7 +78,7 @@ Shader "Unlit/VolumeShader"
                 float3 rayOrigin = i.objectVertex;
 
                 // Use vector from camera to object surface to get ray direction
-                float3 rayDirection = mul(unity_WorldToObject, float4(normalize(i.vectorToSurface), 1));
+                float3 rayDirection = normalize(i.vectorToSurface);
 
                 float4 color = float4(0, 0, 0, 0);
                 float3 samplePosition = rayOrigin;
@@ -83,13 +89,14 @@ Shader "Unlit/VolumeShader"
                     // Accumulate color only within unit cube bounds
                     if(max(abs(samplePosition.x), max(abs(samplePosition.y), abs(samplePosition.z))) < 0.5f + EPSILON)
                     {
-                        float density = tex3D(_MainTex, samplePosition + float3(0.5f, 0.5f, 0.5f)).a;
-                        float4 sampledColor = float4(density,density,density,1);
+                        float4 sampledColor = tex3D(_MainTex, samplePosition + float3(0.5f, 0.5f, 0.5f));
                         sampledColor.a *= _Alpha;
                         color = BlendUnder(color, sampledColor);
                         samplePosition += rayDirection * _StepSize;
                     }
                 }
+
+                clip(color.a-0.05f);
 
                 return color;
             }

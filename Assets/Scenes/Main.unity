@@ -250,7 +250,8 @@ MonoBehaviour:
   shader: {fileID: 7200000, guid: 02f18f58b90722c4396bf3a797b43964, type: 3}
   boidsCount: 50
   boidsData: []
-  volume: {x: 10, y: 10, z: 10}
+  volume: {x: 20, y: 20, z: 20}
+  resolution: {x: 64, y: 64, z: 64}
 --- !u!4 &790744614
 Transform:
   m_ObjectHideFlags: 0

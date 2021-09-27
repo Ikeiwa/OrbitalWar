@@ -10,6 +10,7 @@ struct Boid
 RWStructuredBuffer<Boid> boidBuffer;
 float deltaTime;
 float3 volume;
+float3 volumeRes;
 float boidsCount;
 
 sampler3D _Scene;
@@ -63,9 +64,16 @@ float3 rule3(uint boid){
 }
 
 float3 rule4(uint boid){
-    float sceneValue = tex3Dlod(_Scene, float4(boidBuffer[boid].pos+boidBuffer[boid].velocity,0)).a;
+    float3 uv = boidBuffer[boid].pos+boidBuffer[boid].velocity;
+    uv /= volume;
+    uv += 0.5f;
+    float sceneValue = tex3Dlod(_Scene, float4(uv,0)).a;
 
-    return -boidBuffer[boid].velocity*sceneValue;
+
+    float3 cellPos = boidBuffer[boid].pos+boidBuffer[boid].velocity / volumeRes;
+    cellPos = floor(cellPos)+volumeRes/2;
+
+    return (boidBuffer[boid].pos-cellPos)*sceneValue;
 }
 
 [numthreads(128,1,1)]

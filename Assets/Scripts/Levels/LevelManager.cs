@@ -28,13 +28,31 @@ public class LevelManager : MonoBehaviour
         LoadLevel(currentLevel);
     }
 
+    private Bounds GetLevelBounds()
+    {
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+        MeshRenderer[] levelRenderers = levelObject.GetComponentsInChildren<MeshRenderer>();
+
+        for (int i = 0; i < levelRenderers.Length; i++)
+        {
+            bounds.Encapsulate(levelRenderers[i].bounds);
+        }
+
+        return bounds;
+    }
+
     public void LoadLevel(int lvl)
     {
         if (!player)
             player = Instantiate(playerPrefab);
 
         if (levelObject != null)
+        {
             DestroyImmediate(levelObject);
+            foreach (Enemy enemy in FindObjectsOfType<Enemy>())
+                DestroyImmediate(enemy.gameObject);
+        }
+            
 
         levelObject = Instantiate(levels[lvl].LevelPrefab);
         pathFinder = GetComponent<PathFinder>();
@@ -50,7 +68,10 @@ public class LevelManager : MonoBehaviour
             enemy.transform.rotation = Quaternion.AngleAxis(Random.Range(0, 360), node.up);
         }
 
-        boidsFlock.UpdateScene();
+        Vector3 levelSize = GetLevelBounds().size;
+        float largestSize = Mathf.Max(levelSize.x, levelSize.y, levelSize.z);
+
+        boidsFlock.UpdateScene(new Vector3(largestSize, largestSize, largestSize) *1.5f);
     }
 
     // Update is called once per frame

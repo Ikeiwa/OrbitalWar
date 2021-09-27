@@ -14,6 +14,7 @@ public class BoidsFlock : MonoBehaviour
     public int boidsCount = 50;
     public Boid[] boidsData;
     public Vector3 volume;
+    public Vector3Int resolution = new Vector3Int(64, 64, 64);
 
     private int strideSize;
     private int kernelHandle;
@@ -29,50 +30,92 @@ public class BoidsFlock : MonoBehaviour
         strideSize = sizeof(float) * 3 + sizeof(float) * 3;
         buffer = new ComputeBuffer(boidsCount, strideSize);
 
+        Vector3 halfVolume = volume / 2;
 
         for (int i = 0; i < boidsCount; i++)
         {
             boidsData[i] = new Boid { 
-                pos = new Vector3(Random.Range(0, volume.x), Random.Range(0, volume.y), Random.Range(0, volume.z)), 
+                pos = new Vector3(Random.Range(-halfVolume.x, halfVolume.x), Random.Range(-halfVolume.y, halfVolume.y), Random.Range(-halfVolume.z, halfVolume.z)), 
                 velocity = Random.insideUnitSphere*5 
             };
         }
 
         buffer.SetData(boidsData);
         shader.SetBuffer(kernelHandle, "boidBuffer", buffer);
-        shader.SetVector("volume", volume);
         shader.SetFloat("boidsCount", boidsCount);
 
-        UpdateScene();
-
-        transform.position = volume / 2;
-        transform.localScale = volume;
+        UpdateScene(volume);
     }
 
-    public void UpdateScene()
+    public void UpdateScene(Vector3 size)
     {
-        int size = 32;
-        TextureFormat format = TextureFormat.Alpha8;
+        volume = size;
+
+        TextureFormat format = TextureFormat.ARGB32;
         TextureWrapMode wrapMode = TextureWrapMode.Clamp;
 
-        sceneTex = new Texture3D(size, size, size, format, false);
+        sceneTex = new Texture3D(resolution.x, resolution.y, resolution.z, format, false);
         sceneTex.wrapMode = wrapMode;
 
-        Color[] colors = new Color[size * size * size];
-        Vector3 cellSize = volume / (float)size;
+        Color[] colors = new Color[resolution.x* resolution.y* resolution.z];
+        Vector3 cellSize = new Vector3(volume.x / resolution.x, volume.y / resolution.y, volume.z / resolution.z);
+        
 
-        for (int z = 0; z < size; z++)
+        for (int z = 0; z < resolution.z; z++)
         {
-            int zOffset = z * size * size;
-            for (int y = 0; y < size; y++)
+            int zOffset = z * resolution.x * resolution.y;
+            for (int y = 0; y < resolution.y; y++)
             {
-                int yOffset = y * size;
-                for (int x = 0; x < size; x++)
+                int yOffset = y * resolution.x;
+                for (int x = 0; x < resolution.x; x++)
                 {
                     Vector3 pos = new Vector3(x, y, z);
                     pos.Scale(cellSize);
-                    bool hit = Physics.CheckSphere(pos, cellSize.x);
-                    colors[x + yOffset + zOffset] = hit ? Color.white : new Color(0,0,0,0);
+                    pos -= volume / 2;
+
+                    //Collider[] hits = Physics.CheckSphere(pos, cellSize.x, 1 << 6);
+
+                    if (Physics.CheckSphere(pos, cellSize.x, 1 << 6))
+                    {
+                        /*if(hits[0].GetType() == typeof(MeshCollider))
+                        {
+                            MeshCollider collider = (MeshCollider)hits[0];
+                            float minDist = float.MaxValue;
+                            Vector3 normal = Vector3.up;
+
+                            for(int i=0;i< collider.sharedMesh.vertexCount; i++)
+                            {
+                                float dist = (collider.sharedMesh.vertices[i] - pos).sqrMagnitude;
+                                if (dist < minDist)
+                                {
+                                    minDist = dist;
+                                    normal = collider.sharedMesh.normals[i];
+                                }
+                            }
+
+                            colors[x + yOffset + zOffset] = new Color(normal.x, normal.y, normal.z, 1);
+                        }
+                        else
+                        {
+                            Vector3 dir = (hits[0].ClosestPoint(pos) - pos).normalized;
+
+                            if (Physics.Raycast(pos, dir, out RaycastHit hit, float.PositiveInfinity, 1 << 6))
+                            {
+                                colors[x + yOffset + zOffset] = new Color(hit.normal.x, hit.normal.y, hit.normal.z, 1);
+                            }
+                            else
+                            {
+                                colors[x + yOffset + zOffset] = new Color(-dir.x, -dir.y, -dir.z, 1);
+                            }
+                        }*/
+
+
+                        colors[x + yOffset + zOffset] = Color.white; 
+                    }
+                    else
+                    {
+                        colors[x + yOffset + zOffset] = new Color(0, 0, 0, 0);
+                    }
                 }
             }
         }
@@ -80,8 +123,11 @@ public class BoidsFlock : MonoBehaviour
         sceneTex.SetPixels(colors);
         sceneTex.Apply();
 
+        shader.SetVector("volume", volume);
+        shader.SetVector("volumeRes", new Vector3(volume.x / resolution.x, volume.y / resolution.y, volume.z / resolution.z));
         shader.SetTexture(kernelHandle, "_Scene", sceneTex);
         GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex", sceneTex);
+        transform.localScale = volume;
     }
 
     private void OnDestroy()
@@ -110,6 +156,8 @@ public class BoidsFlock : MonoBehaviour
                 Gizmos.DrawLine(boidsData[i].pos, boidsData[i].pos + boidsData[i].velocity);
             }
         }
+
+        Gizmos.DrawWireCube(transform.position, volume);
         
     }
 }
