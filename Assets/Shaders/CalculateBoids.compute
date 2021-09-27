@@ -1,0 +1,42 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct Boid
+{
+	float3 pos;
+	float3 velocity;
+};
+
+RWStructuredBuffer<Boid> boidBuffer;
+float deltaTime;
+float3 volume;
+int boidsCount;
+
+float3 rule1(Boid boid){
+    return 0;
+}
+
+float3 rule2(Boid boid){
+    return 0;
+}
+
+float3 rule3(Boid boid){
+    return 0;
+}
+
+[numthreads(128,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    Boid boid = boidBuffer[id.x];
+
+    float3 v1 = rule1(boid);
+    float3 v2 = rule2(boid);
+    float3 v3 = rule3(boid);
+
+    boid.velocity += v1+v2+v3;
+    boid.pos += boid.velocity * deltaTime;
+
+    boidBuffer[id.x] = boid;
+}
+
+

@@ -33,9 +33,9 @@ public class GravityCharacterController : MonoBehaviour
     private void ProcessInput()
     {
         Vector3 direction = transform.TransformDirection(inputDir);
-        Vector3 move = direction * moveSpeed * Time.fixedDeltaTime;
+        Vector3 move = direction * moveSpeed * Time.deltaTime;
         //rigidbody.MovePosition(transform.position + move);
-        rigidbody.AddForce(move*Time.fixedDeltaTime*1000, ForceMode.Acceleration);
+        rigidbody.AddForce(move*Time.deltaTime*1000, ForceMode.Acceleration);
         Debug.DrawRay(transform.position + transform.up * 0.25f, direction * 2,Color.green);
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -21,7 +22,7 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(path != null && path.Count>2)
+        if(path != null && path.Count>=2)
         {
             if (currentNode < path.Count)
             {
@@ -38,12 +39,12 @@ public class Enemy : MonoBehaviour
                     transform.Translate((target.position - transform.position).normalized * trueSpeed * Time.deltaTime, Space.World);
 
 
-                Quaternion endRot = Quaternion.LookRotation(target.position - current.position, target.up);
+                Quaternion endRot = Quaternion.LookRotation(target.position - transform.position, target.up);
 
 
                 transform.rotation = Quaternion.Lerp(transform.rotation, endRot, Time.deltaTime* trueSpeed);
 
-                if((target.position- transform.position).sqrMagnitude < 0.32f)
+                if((target.position- transform.position).sqrMagnitude < 0.1f)
                     currentNode++;
             }
         }
@@ -58,17 +59,27 @@ public class Enemy : MonoBehaviour
     {
         while (true)
         {
+            Vector3 playerPos = player.transform.position + player.transform.up * 0.35f;
             PathFinder.Node start = PathFinder.instance.GetClosestNode(transform.position);
-            PathFinder.Node end = PathFinder.instance.GetClosestNode(player.transform.position+player.transform.up);
+            PathFinder.Node end = PathFinder.instance.GetClosestNode(playerPos);
             yield return PathFinder.instance.GetShortestPath(start, end,(newPath) => { path = newPath; } ,2);
-            currentNode = 1;
 
-            List<Vector3> positions = new List<Vector3>();
-            foreach (PathFinder.Node node in path)
-                positions.Add(node.position);
+            if(path != null)
+            {
+                if ((playerPos - path.Last().position).sqrMagnitude < 1)
+                {
+                    path.Add(new PathFinder.Node { position = playerPos, up = player.transform.up });
+                }
 
-            GetComponent<LineRenderer>().positionCount = positions.Count;
-            GetComponent<LineRenderer>().SetPositions(positions.ToArray());
+                currentNode = 1;
+
+                List<Vector3> positions = new List<Vector3>();
+                foreach (PathFinder.Node node in path)
+                    positions.Add(node.position);
+
+                GetComponent<LineRenderer>().positionCount = positions.Count;
+                GetComponent<LineRenderer>().SetPositions(positions.ToArray());
+            }
 
             yield return new WaitForSeconds(1);
         }

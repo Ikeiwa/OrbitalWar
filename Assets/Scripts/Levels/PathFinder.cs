@@ -32,6 +32,20 @@ public class PathFinder : MonoBehaviour
         }
     }
 
+    class AStarNode
+    {
+        public Node node;
+        public AStarNode parent;
+        public float cost;
+
+        public AStarNode(Node node, AStarNode parent,float cost)
+        {
+            this.node = node;
+            this.parent = parent;
+            this.cost = cost;
+        }
+    }
+
     public enum SearchAlgo
     {
         Dijkstra,
@@ -276,13 +290,60 @@ public class PathFinder : MonoBehaviour
 
     public IEnumerator GetShortestPathAStart(Node start, Node end, System.Action<List<Node>> callback, int type = 0)
     {
-        callback(null);
-        yield return null;
-    }
+        List<Node> path = new List<Node>();
+        if (start == end)
+        {
+            path.Add(start);
+            callback(path);
+        }
 
-    public static float Heuristic(Node a, Node b)
-    {
-        return Mathf.Abs(a.position.x - b.position.x) + Mathf.Abs(a.position.y - b.position.y) + Mathf.Abs(a.position.z - b.position.z);
+        List<AStarNode> openNodes = new List<AStarNode>();
+        List<AStarNode> closedNodes = new List<AStarNode>();
+
+        openNodes.Add(new AStarNode(start,null,0));
+
+        AStarNode current = openNodes[0];
+
+        while(openNodes.Count > 0)
+        {
+            current = openNodes.MinOf(n => n.cost);
+            if (current.node == end)
+                break;
+
+            closedNodes.Add(current);
+            openNodes.Remove(current);
+
+            foreach (Node neighbor in current.node.connections)
+            {
+                if (!openNodes.Any(n => n.node == neighbor) && !closedNodes.Any(n => n.node == neighbor))
+                {
+                    float nodeDistance = (neighbor.position - current.node.position).sqrMagnitude;
+                    if (type != 0 && neighbor.type != 0 && neighbor.type != type)
+                        nodeDistance *= 4;
+
+                    float cost = nodeDistance + (end.position - neighbor.position).sqrMagnitude;
+                    openNodes.Add(new AStarNode(neighbor, current, cost));
+                }
+            }
+            yield return null;
+        }
+        
+
+        if (openNodes.Count > 0)
+        {
+            while (current.parent != null)
+            {
+                path.Add(current.node);
+                current = current.parent;
+            }
+
+            path.Reverse();
+        }
+
+        path.Insert(0, start);
+
+        callback(path);
+        yield return null;
     }
 
     private void Awake()
@@ -317,6 +378,14 @@ public class PathFinder : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             GetComponent<MeshRenderer>().enabled = !GetComponent<MeshRenderer>().enabled;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            if (searchMode == SearchAlgo.Dijkstra)
+                searchMode = SearchAlgo.AStar;
+            else
+                searchMode = SearchAlgo.Dijkstra;
         }
     }
 
