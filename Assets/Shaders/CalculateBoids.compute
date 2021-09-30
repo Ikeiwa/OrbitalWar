@@ -1,95 +1,40 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
+static const int threadGroupSize = 1024;
 
-struct Boid
-{
-	float3 pos;
-	float3 velocity;
+struct Boid {
+    float3 pos;
+    float3 direction;
+
+    float3 flockDirection;
+    float3 flockCenter;
+    float3 avoidDirection;
+    int numFlockmates;
 };
 
-RWStructuredBuffer<Boid> boidBuffer;
-float deltaTime;
-float3 volume;
-float3 volumeRes;
-float boidsCount;
+RWStructuredBuffer<Boid> boids;
+int numBoids;
+float viewRadius;
+float avoidRadius;
 
-sampler3D _Scene;
-
-float3 rule1(uint boid){
-    float3 center = 0;
-
-    [loop]
-	for (int i = 0; i < boidsCount; i++)
-	{
-		if (i != int(boid))
-		{
-            center += boidBuffer[i].pos;
-		}
-	}
-    center /= boidsCount-1;
-
-    return (center-boidBuffer[boid].pos) / 100;
-}
-
-float3 rule2(uint boid){
-    float3 c = 0;
-    float numClose = 1;
-    [loop]
-	for (int i = 0; i < boidsCount; i++)
-	{
-		if (i != int(boid))
-		{
-            if(distance(boidBuffer[boid].pos,boidBuffer[i].pos) < 1){
-                c -= normalize(boidBuffer[i].pos - boidBuffer[boid].pos);
-                numClose++;
-            }
-		}
-	}
-    return c/numClose/8;
-}
-
-float3 rule3(uint boid){
-    float3 pv = 0;
-    [loop]
-	for (int i = 0; i < boidsCount; i++)
-	{
-		if (i != int(boid))
-		{
-            pv += boidBuffer[i].velocity;
-		}
-	}
-    pv /= boidsCount-1;
-
-    return (pv - boidBuffer[boid].velocity) / 8;
-}
-
-float3 rule4(uint boid){
-    float3 uv = boidBuffer[boid].pos+boidBuffer[boid].velocity;
-    uv /= volume;
-    uv += 0.5f;
-    float sceneValue = tex3Dlod(_Scene, float4(uv,0)).a;
-
-
-    float3 cellPos = boidBuffer[boid].pos+boidBuffer[boid].velocity / volumeRes;
-    cellPos = floor(cellPos)+volumeRes/2;
-
-    return (boidBuffer[boid].pos-cellPos)*sceneValue;
-}
-
-[numthreads(128,1,1)]
+[numthreads(threadGroupSize,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    Boid boid = boidBuffer[id.x];
+    for (uint indexB = 0; indexB < numBoids; indexB ++) {
+        if (id.x != indexB) {
+            Boid boidB = boids[indexB];
+            float3 offset = boidB.pos - boids[id.x].pos;
+            float sqrDst = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
 
-    float3 v1 = rule1(id.x);
-    float3 v2 = rule2(id.x);
-    float3 v3 = rule3(id.x);
-    float3 v4 = rule4(id.x);
+            if (sqrDst < viewRadius * viewRadius) {
+                boids[id.x].numFlockmates += 1;
+                boids[id.x].flockDirection += boidB.direction;
+                boids[id.x].flockCenter += boidB.pos;
 
-    boid.velocity += (v1+v2+v3+v4) * deltaTime * 50;
-    boid.pos += boid.velocity * deltaTime;
-
-    boidBuffer[id.x] = boid;
+                if (sqrDst < avoidRadius * avoidRadius) {
+                    boids[id.x].avoidDirection -= offset / sqrDst;
+                }
+            }
+        }
+    }
 }
-
-

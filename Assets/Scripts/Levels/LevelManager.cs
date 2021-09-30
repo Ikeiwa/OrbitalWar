@@ -8,7 +8,7 @@ public class LevelManager : MonoBehaviour
     public int currentLevel = 0;
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
-    public BoidsFlock boidsFlock;
+    public GameObject bounds;
 
 
     private GameObject player;
@@ -71,7 +71,7 @@ public class LevelManager : MonoBehaviour
         Vector3 levelSize = GetLevelBounds().size;
         float largestSize = Mathf.Max(levelSize.x, levelSize.y, levelSize.z);
 
-        boidsFlock.UpdateScene(new Vector3(largestSize, largestSize, largestSize) *1.5f);
+        bounds.transform.localScale = new Vector3(largestSize, largestSize, largestSize) * 1.5f;
     }
 
     // Update is called once per frame
