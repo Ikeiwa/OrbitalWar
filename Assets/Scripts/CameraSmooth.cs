@@ -13,7 +13,7 @@ public class CameraSmooth : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         //transform.position = Vector3.Lerp(transform.position, target.position, Time.deltaTime * 8);
         transform.position = Vector3.Lerp(transform.position, Vector3.Lerp(target.transform.position, target.firePos, 0.25f), Time.deltaTime * 10);
