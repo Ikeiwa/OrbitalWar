@@ -10,8 +10,6 @@ public class LevelManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject bounds;
 
-    public Texture2D cursor;
-
 
     private GameObject player;
     private GameObject levelObject;
@@ -20,8 +18,7 @@ public class LevelManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.SetCursor(cursor, new Vector2(0.5f, 0.5f), CursorMode.Auto);
+        
 
         pathFinder = GetComponent<PathFinder>();
         LoadLevel();

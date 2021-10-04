@@ -1,27 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 public class Player : MonoBehaviour, IDamageable
 {
     public Transform head;
     public Transform[] firePoints;
     public GameObject projectilePrefab;
+    public AudioClip fireSound;
+    public PostProcessProfile postProcess;
+    private ChromaticAberration chromaticAberration;
     private GravityCharacterController controller;
+    private AudioSource audioSource;
 
     public float health = 100;
     public float maxHealth = 100;
 
     public Vector3 firePos;
 
+    public float damageTimer = 0;
+
     public void ApplyDamage(float damages)
     {
-
+        damageTimer = 0.75f;
     }
 
     private void Awake()
     {
         controller = GetComponent<GravityCharacterController>();
+        audioSource = GetComponent<AudioSource>();
+
+        postProcess.TryGetSettings(out chromaticAberration);
+    }
+
+    private void Update()
+    {
+        chromaticAberration.intensity.value = damageTimer + 0.05f;
+        if (damageTimer > 0)
+        {
+            damageTimer -= Time.deltaTime;
+        }
     }
 
     private void FixedUpdate()
@@ -48,7 +67,8 @@ public class Player : MonoBehaviour, IDamageable
                 projectile.transform.position = firePoint.position;
                 projectile.transform.rotation = firePoint.rotation;
             }
-            
+            audioSource.pitch = Random.Range(0.95f, 1.05f);
+            audioSource.PlayOneShot(fireSound, Random.Range(0.95f, 1.05f));
         }
     }
 }

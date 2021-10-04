@@ -53,9 +53,12 @@ public class Boid : MonoBehaviour
     Transform cachedTransform;
     Transform target;
 
+    int frequency = 0;
+
     void Awake()
     {
         cachedTransform = transform;
+        frequency = Random.Range(0, 255);
     }
 
     public void Init(BoidSettings settings, Transform target)
@@ -112,6 +115,13 @@ public class Boid : MonoBehaviour
         cachedTransform.forward = dir;
         position = cachedTransform.position;
         forward = dir;
+
+        if(MusicManager.spectrum != null)
+        {
+            float size = Mathf.Lerp(transform.localScale.x,0.1f + MusicManager.spectrum[frequency]*20,Time.deltaTime*10);
+            transform.localScale = new Vector3(size, size, size);
+        }
+
     }
 
     bool IsHeadingForCollision()

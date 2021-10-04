@@ -143,7 +143,7 @@ public class PathFinder : MonoBehaviour
             }
         }
 
-        GeneratePreview();
+        //GeneratePreview();
     }
 
     public Mesh CopyMesh(Mesh mesh,Color col)
@@ -377,6 +377,8 @@ public class PathFinder : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
+            if (GetComponent<MeshFilter>().sharedMesh == null)
+                GeneratePreview();
             GetComponent<MeshRenderer>().enabled = !GetComponent<MeshRenderer>().enabled;
         }
 
