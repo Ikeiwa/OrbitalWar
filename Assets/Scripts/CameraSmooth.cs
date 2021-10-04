@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class CameraSmooth : MonoBehaviour
 {
-    public Transform target;
+    public Player target;
 
     // Start is called before the first frame update
     void Start()
     {
-        target = transform.parent;
         transform.parent = null;
     }
 
@@ -17,7 +16,7 @@ public class CameraSmooth : MonoBehaviour
     void Update()
     {
         //transform.position = Vector3.Lerp(transform.position, target.position, Time.deltaTime * 8);
-        transform.position = target.position;
-        transform.rotation = Quaternion.Lerp(transform.rotation, target.rotation, Time.deltaTime * 5);
+        transform.position = Vector3.Lerp(transform.position, Vector3.Lerp(target.transform.position, target.firePos, 0.25f), Time.deltaTime * 10);
+        transform.rotation = Quaternion.Lerp(transform.rotation, target.transform.rotation, Time.deltaTime * 5);
     }
 }

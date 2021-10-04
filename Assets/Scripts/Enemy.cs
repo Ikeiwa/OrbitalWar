@@ -3,14 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamageable
 {
+    public GameObject explosionPrefab;
     public float speed = 1;
+    public float health = 20;
 
     List<PathFinder.Node> path;
     int currentNode = 1;
 
     Player player;
+
+    public void ApplyDamage(float damages)
+    {
+        health -= damages;
+        if (health <= 0)
+        {
+            Instantiate(explosionPrefab, transform.position, transform.rotation);
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()

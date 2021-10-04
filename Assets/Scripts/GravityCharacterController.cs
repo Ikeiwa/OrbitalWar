@@ -35,7 +35,7 @@ public class GravityCharacterController : MonoBehaviour
         Vector3 direction = transform.TransformDirection(inputDir);
         Vector3 move = direction * moveSpeed * Time.deltaTime;
         //rigidbody.MovePosition(transform.position + move);
-        rigidbody.AddForce(move*Time.deltaTime*1000, ForceMode.Acceleration);
+        rigidbody.AddForce(move*10, ForceMode.Force);
         Debug.DrawRay(transform.position + transform.up * 0.25f, direction * 2,Color.green);
     }
 
@@ -48,7 +48,7 @@ public class GravityCharacterController : MonoBehaviour
 
         Ray ray = new Ray(capsuleBottom + transform.up * .01f, -transform.up*2);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, radius * 5f))
+        if (Physics.Raycast(ray, out hit, radius * 5f,1<<6 ,QueryTriggerInteraction.Ignore))
         {
 
             float normalAngle = Vector3.Angle(hit.normal, transform.up);
@@ -87,7 +87,7 @@ public class GravityCharacterController : MonoBehaviour
         inputDir = direction;
     }
 
-    public Vector3 GetSmoothedNormal(RaycastHit hit)
+    public static Vector3 GetSmoothedNormal(RaycastHit hit)
     {
         var meshCollider = hit.collider as MeshCollider;
         if (meshCollider == null)
@@ -107,9 +107,9 @@ public class GravityCharacterController : MonoBehaviour
             var localNormal = (B[0] * N0 + B[1] * N1 + B[2] * N2).normalized;
 
 
-            Debug.DrawRay(mesh.vertices[p0], mesh.normals[p0], Color.red);
+            /*Debug.DrawRay(mesh.vertices[p0], mesh.normals[p0], Color.red);
             Debug.DrawRay(mesh.vertices[p1], mesh.normals[p1], Color.red);
-            Debug.DrawRay(mesh.vertices[p2], mesh.normals[p2], Color.red);
+            Debug.DrawRay(mesh.vertices[p2], mesh.normals[p2], Color.red);*/
 
             return meshCollider.transform.TransformDirection(localNormal);
         }
