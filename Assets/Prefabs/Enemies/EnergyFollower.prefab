@@ -11,13 +11,13 @@ GameObject:
   - component: {fileID: 6693924917371670245}
   - component: {fileID: 6693924917371670244}
   - component: {fileID: 6693924917371670251}
-  - component: {fileID: 7459231261977034805}
   - component: {fileID: 6693924917371670249}
+  - component: {fileID: 5272650336196291783}
   - component: {fileID: 2892291563180543098}
   - component: {fileID: 1948172670656712134}
   - component: {fileID: 478616852547359864}
   m_Layer: 7
-  m_Name: Enemy
+  m_Name: EnergyFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,20 +87,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &7459231261977034805
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6693924917371670248}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 3
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6693924917371670249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,6 +102,19 @@ MonoBehaviour:
   explosionPrefab: {fileID: 1449630657487120248, guid: 47df5173d632ef34491fb1fcd8536240, type: 3}
   speed: 1
   health: 20
+--- !u!135 &5272650336196291783
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6693924917371670248}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.79999995
+  m_Center: {x: 0, y: 0, z: -0.000000029802322}
 --- !u!120 &2892291563180543098
 LineRenderer:
   m_ObjectHideFlags: 0

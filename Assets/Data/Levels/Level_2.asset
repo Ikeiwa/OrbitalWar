@@ -13,3 +13,6 @@ MonoBehaviour:
   m_Name: Level_2
   m_EditorClassIdentifier: 
   LevelPrefab: {fileID: 2122853430198690281, guid: c1156b1ead06b51438e0af7c9f14e20e, type: 3}
+  music:
+    clip: {fileID: 8300000, guid: 060d161fdb8ed784e820584f17b99033, type: 3}
+    BPM: 85

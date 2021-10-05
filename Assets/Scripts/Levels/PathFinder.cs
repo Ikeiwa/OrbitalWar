@@ -104,7 +104,7 @@ public class PathFinder : MonoBehaviour
             
 
             graph.Add(new Node { 
-                position = center + normal * 0.35f, 
+                position = center + normal * 0.5f, 
                 up = normal ,
                 type = type
             });
@@ -144,6 +144,8 @@ public class PathFinder : MonoBehaviour
         }
 
         //GeneratePreview();
+        GetComponent<MeshFilter>().mesh = null;
+        GetComponent<MeshRenderer>().enabled = false;
     }
 
     public Mesh CopyMesh(Mesh mesh,Color col)

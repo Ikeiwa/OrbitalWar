@@ -6,4 +6,5 @@ using UnityEngine;
 public class LevelData : ScriptableObject
 {
     public GameObject LevelPrefab;
+    public Music music;
 }

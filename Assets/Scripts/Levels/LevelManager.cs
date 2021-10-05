@@ -7,9 +7,10 @@ public class LevelManager : MonoBehaviour
     public LevelData[] levels;
     public int currentLevel = 0;
     public GameObject playerPrefab;
-    public GameObject enemyPrefab;
     public GameObject bounds;
 
+    public EnemySpawner enemySpawner;
+    public Enemy[] enemies;
 
     private GameObject player;
     private GameObject levelObject;
@@ -18,8 +19,6 @@ public class LevelManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
-
         pathFinder = GetComponent<PathFinder>();
         LoadLevel();
     }
@@ -65,15 +64,18 @@ public class LevelManager : MonoBehaviour
         for(int i=0; i < pathFinder.graph.Count / 32; i++)
         {
             PathFinder.Node node = pathFinder.graph[Random.Range(0, pathFinder.graph.Count - 1)];
-            GameObject enemy = Instantiate(enemyPrefab);
+            EnemySpawner enemy = Instantiate(enemySpawner);
             enemy.transform.position = node.position;
-            enemy.transform.rotation = Quaternion.AngleAxis(Random.Range(0, 360), node.up);
+            enemy.transform.rotation = Quaternion.FromToRotation(enemy.transform.up, node.up) * enemy.transform.rotation;
+            enemy.enemyPrefab = enemies[Random.Range(0, enemies.Length)];
         }
 
         Vector3 levelSize = GetLevelBounds().size;
         float largestSize = Mathf.Max(levelSize.x, levelSize.y, levelSize.z);
 
         bounds.transform.localScale = new Vector3(largestSize, largestSize, largestSize) * 1.5f;
+
+        MusicManager.Instance.Play(levels[lvl].music);
     }
 
     // Update is called once per frame

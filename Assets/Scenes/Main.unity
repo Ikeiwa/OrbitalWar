@@ -492,8 +492,8 @@ RectTransform:
   m_Father: {fileID: 1165951743}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -706,8 +706,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a0b68915aac09747b15d5fc062b50e6, type: 2}
   currentLevel: 0
   playerPrefab: {fileID: 3316346084369519847, guid: aa2fa9121b5a8ff4b91136aa085c43a4, type: 3}
-  enemyPrefab: {fileID: 6693924917371670248, guid: a014371e20d5a5c4981949edb5fa6f9a, type: 3}
   bounds: {fileID: 2046482426}
+  enemySpawner: {fileID: 2378978061873698327, guid: b54ac73b43625c94696cf730bf2a5684, type: 3}
+  enemies:
+  - {fileID: 6693924917371670249, guid: a014371e20d5a5c4981949edb5fa6f9a, type: 3}
+  - {fileID: -2769081951888819973, guid: eeed28be8ae0854418a9b0dbf6059c2d, type: 3}
 --- !u!4 &1112027307
 Transform:
   m_ObjectHideFlags: 0
@@ -916,10 +919,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 640, y: 360}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -996,7 +999,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 92ef7363168860243b1010da14926dce, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 0.25
   m_Pitch: 1
@@ -1108,6 +1111,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e6dbcc7a74acc749a2b494f201c249e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnBeat:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1750756390
 GameObject:
   m_ObjectHideFlags: 0

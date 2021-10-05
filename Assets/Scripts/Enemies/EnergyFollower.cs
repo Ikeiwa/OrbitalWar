@@ -68,7 +68,7 @@ public class EnergyFollower : Enemy
     {
         while (true)
         {
-            Vector3 playerPos = player.transform.position + player.transform.up * 0.35f;
+            Vector3 playerPos = player.transform.position + player.transform.up * 0.5f;
             PathFinder.Node start = PathFinder.instance.GetClosestNode(transform.position);
             PathFinder.Node end = PathFinder.instance.GetClosestNode(playerPos);
             yield return PathFinder.instance.GetShortestPath(start, end,(newPath) => { path = newPath; } ,2);

@@ -116,11 +116,8 @@ public class Boid : MonoBehaviour
         position = cachedTransform.position;
         forward = dir;
 
-        if(MusicManager.spectrum != null)
-        {
-            float size = Mathf.Lerp(transform.localScale.x,0.1f + MusicManager.spectrum[frequency]*20,Time.deltaTime*10);
-            transform.localScale = new Vector3(size, size, size);
-        }
+        float size = Mathf.Lerp(transform.localScale.x,0.1f + MusicManager.spectrum[frequency]*20,Time.deltaTime*10);
+        transform.localScale = new Vector3(size, size, size);
 
     }
 
