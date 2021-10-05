@@ -9,16 +9,17 @@ using UnityEditor;
 
 public class PathFinder : MonoBehaviour
 {
+    [System.Serializable]
     public class Node
     {
         public Vector3 position;
         public Vector3 up;
-        public List<Node> connections;
+        public List<int> connections;
         public int type = 0;
 
         public Node()
         {
-            connections = new List<Node>();
+            connections = new List<int>();
         }
     }
 
@@ -62,9 +63,10 @@ public class PathFinder : MonoBehaviour
     private Mesh graphPreview;
     public static PathFinder instance;
 
-    public void GenerateGraph(Mesh mesh)
+
+    public static List<Node> GenerateGraph(Mesh mesh)
     {
-        graph = new List<Node>();
+        List<Node> graph = new List<Node>();
 
         int[] indices = mesh.GetIndices(0);
 
@@ -74,12 +76,12 @@ public class PathFinder : MonoBehaviour
 
         List<Face> nodeFace = new List<Face>();
 
-        for (int i=0;i< indices.Length; i += 4)
+        for (int i = 0; i < indices.Length; i += 4)
         {
             Vector3 center = mesh.vertices[indices[i]];
-            center += mesh.vertices[indices[i+1]];
-            center += mesh.vertices[indices[i+2]];
-            center += mesh.vertices[indices[i+3]];
+            center += mesh.vertices[indices[i + 1]];
+            center += mesh.vertices[indices[i + 2]];
+            center += mesh.vertices[indices[i + 3]];
             center /= 4.0f;
 
             Vector3 normal = mesh.normals[indices[i]];
@@ -92,49 +94,50 @@ public class PathFinder : MonoBehaviour
             if (mesh.colors32.Length > 0)
             {
                 Color32 col = mesh.colors32[indices[i]];
-                col = Color32.Lerp(col, mesh.colors32[indices[i + 1]],0.5f);
-                col = Color32.Lerp(col, mesh.colors32[indices[i + 2]],0.5f);
-                col = Color32.Lerp(col, mesh.colors32[indices[i + 3]],0.5f);
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 1]], 0.5f);
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 2]], 0.5f);
+                col = Color32.Lerp(col, mesh.colors32[indices[i + 3]], 0.5f);
 
                 if (col.r > 225)
                     type = 1;
                 else if (col.g > 225)
                     type = 2;
             }
-            
 
-            graph.Add(new Node { 
-                position = center + normal * 0.5f, 
-                up = normal ,
+
+            graph.Add(new Node
+            {
+                position = center + normal * 0.5f,
+                up = normal,
                 type = type
             });
 
-            nodeFace.Add(new Face(indices[i], indices[i+1], indices[i+2], indices[i+3]));
+            nodeFace.Add(new Face(indices[i], indices[i + 1], indices[i + 2], indices[i + 3]));
         }
 
-        for(int i = 0; i < graph.Count; i++)
+        for (int i = 0; i < graph.Count; i++)
         {
             for (int t = 0; t < graph.Count; t++)
             {
                 if (t == i) continue;
                 Vector3 dir = graph[t].position - graph[i].position;
                 if (dir.sqrMagnitude > 12) continue;
-                if (Physics.SphereCast(new Ray(graph[i].position, dir),0.1f, dir.magnitude, (1 << 6) | (1 << 8))) continue;
+                if (Physics.SphereCast(new Ray(graph[i].position, dir), 0.1f, dir.magnitude, (1 << 6) | (1 << 8))) continue;
 
-                for(int va = 0; va < 4; va++)
+                for (int va = 0; va < 4; va++)
                 {
                     for (int vb = 0; vb < 4; vb++)
                     {
-                        if(nodeFace[i].vertices[va] == nodeFace[t].vertices[vb])
+                        if (nodeFace[i].vertices[va] == nodeFace[t].vertices[vb])
                         {
                             //nodes[i].connections.Add(new Connection { length = dir.sqrMagnitude, target = nodes[t] });
-                            graph[i].connections.Add(graph[t]);
+                            graph[i].connections.Add(t);
                             continue;
                         }
-                        else if(mesh.vertices[nodeFace[i].vertices[va]] == mesh.vertices[nodeFace[t].vertices[vb]])
+                        else if (mesh.vertices[nodeFace[i].vertices[va]] == mesh.vertices[nodeFace[t].vertices[vb]])
                         {
                             //nodes[i].connections.Add(new Connection { length = dir.sqrMagnitude, target = nodes[t] });
-                            graph[i].connections.Add(graph[t]);
+                            graph[i].connections.Add(t);
                             continue;
                         }
                     }
@@ -143,7 +146,21 @@ public class PathFinder : MonoBehaviour
             }
         }
 
+        return graph;
+    }
+
+    public void SetupGraph(Mesh mesh)
+    {
+        graph = GenerateGraph(mesh);
+
         //GeneratePreview();
+        GetComponent<MeshFilter>().mesh = null;
+        GetComponent<MeshRenderer>().enabled = false;
+    }
+
+    public void LoadGraph(List<Node> newGraph)
+    {
+        graph = newGraph;
         GetComponent<MeshFilter>().mesh = null;
         GetComponent<MeshRenderer>().enabled = false;
     }
@@ -187,7 +204,7 @@ public class PathFinder : MonoBehaviour
 
             for(int l = 0; l < graph[i].connections.Count; l++)
             {
-                Vector3 dir = graph[i].connections[l].position - graph[i].position;
+                Vector3 dir = graph[graph[i].connections[l]].position - graph[i].position;
                 meshes.Add(new CombineInstance { mesh = linkMesh, transform = Matrix4x4.TRS(graph[i].position, Quaternion.LookRotation(dir, graph[i].up), new Vector3(0.5f,0.5f, dir.magnitude/2)) });
             }
         }
@@ -269,7 +286,7 @@ public class PathFinder : MonoBehaviour
 
             for (int i = 0; i < current.connections.Count; i++)
             {
-                Node neighbor = current.connections[i];
+                Node neighbor = graph[current.connections[i]];
                 float length = Vector3.Distance(current.position, neighbor.position);
 
                 if(type != 0 && neighbor.type != 0 && neighbor.type != type)
@@ -315,8 +332,10 @@ public class PathFinder : MonoBehaviour
             closedNodes.Add(current);
             openNodes.Remove(current);
 
-            foreach (Node neighbor in current.node.connections)
+            foreach (int neighborIndex in current.node.connections)
             {
+                Node neighbor = graph[neighborIndex];
+
                 if (!openNodes.Any(n => n.node == neighbor) && !closedNodes.Any(n => n.node == neighbor))
                 {
                     float nodeDistance = (neighbor.position - current.node.position).sqrMagnitude;

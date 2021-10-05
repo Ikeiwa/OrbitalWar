@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -28,6 +29,7 @@ public class MusicManager : MonoBehaviour
 
     private double startTime;
     private float deltaTime = 0;
+    public MidiNote[] notes;
 
     // Start is called before the first frame update
     void Awake()
@@ -46,6 +48,11 @@ public class MusicManager : MonoBehaviour
     {
         music = newMusic;
         audioSource.clip = music.clip;
+
+        string midiPath = Path.Combine(Application.streamingAssetsPath, "/Midi", music.clip.name + ".midi");
+
+        if (File.Exists(midiPath))
+            notes = new MidiFileInspector(midiPath).GetNotes();
 
         startTime = AudioSettings.dspTime + 3;
         audioSource.PlayScheduled(startTime);

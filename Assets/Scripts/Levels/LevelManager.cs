@@ -57,7 +57,12 @@ public class LevelManager : MonoBehaviour
 
         levelObject = Instantiate(levels[lvl].LevelPrefab);
         pathFinder = GetComponent<PathFinder>();
-        pathFinder.GenerateGraph(levelObject.GetComponent<MeshFilter>().mesh);
+
+        if (levels[lvl].graph != null)
+            pathFinder.LoadGraph(levels[lvl].graph);
+        else
+            pathFinder.SetupGraph(levelObject.GetComponent<MeshFilter>().sharedMesh);
+
         player.transform.position = levelObject.transform.Find("PlayerStart").position;
         player.transform.rotation = levelObject.transform.Find("PlayerStart").rotation;
 
