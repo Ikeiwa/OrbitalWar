@@ -124,12 +124,19 @@ public class BoidsFlock : MonoBehaviour
         boidObjects = new GameObject[boidsCount];
         boids = new Boid[boidsCount];
 
+        MaterialPropertyBlock props = new MaterialPropertyBlock();
+
         for (int i = 0; i < boidsCount; i++)
         {
             GameObject boid = Instantiate(boidPrefab);
             boid.transform.parent = transform;
             boidObjects[i] = boid;
             boids[i].Init(settings.minSpeed, settings.maxSpeed);
+
+            props.SetFloat("_Freq", Random.value);
+
+            MeshRenderer renderer = boid.GetComponent<MeshRenderer>();
+            renderer.SetPropertyBlock(props);
         }
     }
 
@@ -178,7 +185,7 @@ public class BoidsFlock : MonoBehaviour
             for(int i = 0; i < boidsCount; i++)
             {
                 boidObjects[i].transform.position = boids[i].position;
-                boidObjects[i].transform.rotation = Quaternion.LookRotation(boids[i].velocity);
+                //boidObjects[i].transform.rotation = Quaternion.LookRotation(boids[i].velocity);
             }
         }
     }

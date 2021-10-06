@@ -87,7 +87,7 @@ public class Projectile : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (entityLayers.value == (entityLayers.value | 1 << other.gameObject.layer)){
-            other.gameObject.GetComponent<IDamageable>().ApplyDamage(damages);
+            other.gameObject.GetComponent<IDamageable>()?.ApplyDamage(damages);
             Explode();
         }
     }

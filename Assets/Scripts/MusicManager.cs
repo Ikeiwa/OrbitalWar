@@ -18,6 +18,7 @@ public class MusicManager : MonoBehaviour
 
     public static MusicManager Instance;
 
+    private float[] tmpSpectrum;
     public static float[] spectrum;
     public static float energy = 0;
     public static Music music;
@@ -30,6 +31,10 @@ public class MusicManager : MonoBehaviour
     private double startTime;
     private float deltaTime = 0;
     public MidiNote[] notes;
+    public Texture2D spectrumTex;
+    public float smooth = 0.00007f;
+
+    private static int spectrumSize = 256;
 
     // Start is called before the first frame update
     void Awake()
@@ -41,7 +46,12 @@ public class MusicManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         audioSource = GetComponent<AudioSource>();
-        spectrum = new float[256];
+        spectrum = new float[spectrumSize];
+        tmpSpectrum = new float[spectrumSize];
+
+        spectrumTex = new Texture2D(spectrumSize, 1, TextureFormat.RFloat, false);
+        spectrumTex.filterMode = FilterMode.Point;
+        Shader.SetGlobalTexture("_MusicSpectrumTex", spectrumTex);
     }
 
     public void Play(Music newMusic)
@@ -65,15 +75,26 @@ public class MusicManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Hamming);
+        audioSource.GetSpectrumData(tmpSpectrum, 0, FFTWindow.BlackmanHarris);
+
 
         energy = 0;
-        for(int i = 0; i < 256; i++)
+        for(int i = 0; i < spectrumSize; i++)
         {
-            energy += spectrum[i];
+            float freq = tmpSpectrum[i];
+
+            freq = Mathf.Pow(freq / (float)spectrumSize, 1 / 2.2f);
+            freq = spectrum[i] * smooth + freq * (1 - smooth);
+
+            energy += freq;
+            spectrumTex.SetPixel(i, 0, new Color(freq*100, freq*100, freq*100));
+
+            spectrum[i] = freq;
         }
-        energy /= 256;
+        energy /= spectrumSize;
         energy *= 1000;
+
+        spectrumTex.Apply();
 
         float BPS = music.BPM / 60;
 

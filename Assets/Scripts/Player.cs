@@ -36,7 +36,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private void Update()
     {
-        chromaticAberration.intensity.value = damageTimer + 0.05f;
+        chromaticAberration.intensity.value = damageTimer*5 + 0.05f;
         if (damageTimer > 0)
         {
             damageTimer -= Time.deltaTime;
