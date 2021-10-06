@@ -633,7 +633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: 1019059984485111445, guid: 621b71a37ab0fb54ebd1088bd4c6fdfe, type: 3}
   shader: {fileID: 7200000, guid: 02f18f58b90722c4396bf3a797b43964, type: 3}
-  boidsCount: 200
+  boidsCount: 1000
   target: {fileID: 0}
   settings:
     minSpeed: 1
@@ -641,6 +641,7 @@ MonoBehaviour:
     perceptionRadius: 5
     avoidanceRadius: 0.5
     maxSteerForce: 3
+    maxSceneDistance: 40
     alignWeight: 2
     cohesionWeight: 2.5
     seperateWeight: 4
@@ -720,7 +721,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cbdabab3a37c02947b56706dafa30b5f, type: 2}
   - {fileID: 11400000, guid: 6b7bec1d2ee44594f8422771d738d297, type: 2}
   - {fileID: 11400000, guid: 3a0b68915aac09747b15d5fc062b50e6, type: 2}
-  currentLevel: 3
+  currentLevel: 0
   playerPrefab: {fileID: 3316346084369519847, guid: aa2fa9121b5a8ff4b91136aa085c43a4, type: 3}
   bounds: {fileID: 2046482426}
   enemySpawner: {fileID: 2378978061873698327, guid: b54ac73b43625c94696cf730bf2a5684, type: 3}

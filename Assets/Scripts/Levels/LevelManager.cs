@@ -81,6 +81,7 @@ public class LevelManager : MonoBehaviour
         bounds.transform.localScale = new Vector3(largestSize, largestSize, largestSize) * 1.5f;
 
         MusicManager.Instance.Play(levels[lvl].music);
+        FindObjectOfType<BoidsFlock>()?.ResetBoids();
     }
 
     // Update is called once per frame
