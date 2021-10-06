@@ -12,7 +12,7 @@ public class GravityCharacterController : MonoBehaviour
     new private Rigidbody rigidbody;
     private CapsuleCollider capsuleCollider;
 
-    private bool onGround = false;
+    public bool onGround = false;
     private Vector3 inputDir;
     private Vector3 gravity = Vector3.up;
 

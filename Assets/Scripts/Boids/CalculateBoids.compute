@@ -2,39 +2,100 @@
 #pragma kernel CSMain
 static const int threadGroupSize = 1024;
 
-struct Boid {
-    float3 pos;
-    float3 direction;
-
-    float3 flockDirection;
-    float3 flockCenter;
-    float3 avoidDirection;
-    int numFlockmates;
+struct Boid
+{
+	float3 position;
+	float3 velocity;
+    float3 avoidCollision;
+    float3 debug;
 };
 
 RWStructuredBuffer<Boid> boids;
-int numBoids;
-float viewRadius;
-float avoidRadius;
+
+float deltaTime;
+uint boidsCount;
+
+float minSpeed = 2;
+float maxSpeed = 5;
+float perceptionRadius = 2.5f;
+float avoidanceRadius = 1;
+float maxSteerForce = 3;
+
+float alignWeight = 1;
+float cohesionWeight = 1;
+float seperateWeight = 1;
+
+float targetWeight = 1;
+
+float boundsRadius = .27f;
+float avoidCollisionWeight = 10;
+float collisionAvoidDst = 5;
+
+float3 target;
+
+float3 Steer(float3 dir, Boid boid){
+    float3 v = normalize(dir) * maxSpeed - boid.velocity;
+    return normalize(v) * min(length(v),maxSteerForce);
+}
 
 [numthreads(threadGroupSize,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    for (uint indexB = 0; indexB < numBoids; indexB ++) {
-        if (id.x != indexB) {
-            Boid boidB = boids[indexB];
-            float3 offset = boidB.pos - boids[id.x].pos;
-            float sqrDst = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+    Boid boid = boids[id.x];
 
-            if (sqrDst < viewRadius * viewRadius) {
-                boids[id.x].numFlockmates += 1;
-                boids[id.x].flockDirection += boidB.direction;
-                boids[id.x].flockCenter += boidB.pos;
+    float3 acceleration = 0;
+    
+    float3 flockCenter;
+    float3 flockDirection;
+    float3 avoidDirection;
+    float flockMates;
+    float avoidMates;
 
-                if (sqrDst < avoidRadius * avoidRadius) {
-                    boids[id.x].avoidDirection -= offset / sqrDst;
+    for(uint i=0;i<boidsCount;i++){
+
+        if(i!=id.x){
+            Boid other = boids[i];
+
+            float3 offset = other.position - boid.position;
+            float distance = offset.x*offset.x + offset.y*offset.y + offset.z*offset.z;
+
+            if(distance < perceptionRadius*perceptionRadius){
+                flockMates+=1;
+                flockDirection += other.velocity;
+                flockCenter += other.position;
+
+                if (distance < avoidanceRadius * avoidanceRadius) {
+                    avoidMates++;
+                    avoidDirection -= offset / distance;
                 }
             }
         }
     }
+
+    if(flockMates != 0){
+        flockCenter /= flockMates;
+        flockDirection /= flockMates;
+
+        acceleration += Steer(flockCenter-boid.position,boid) * cohesionWeight;
+        acceleration += Steer(flockDirection,boid) * alignWeight;
+        if(avoidMates != 0)
+            acceleration += Steer(avoidDirection,boid) * seperateWeight;
+    }
+
+    if(target.x+target.y+target.z != 0){
+        acceleration += Steer(target - boid.position,boid) * targetWeight;
+    }
+
+    if(boid.avoidCollision.x+boid.avoidCollision.y+boid.avoidCollision.z != 0){
+        acceleration += Steer(boid.avoidCollision,boid) * avoidCollisionWeight;
+    }
+
+    boid.velocity += acceleration * deltaTime;
+    boid.velocity = normalize(boid.velocity) * max(min(length(boid.velocity),maxSpeed),minSpeed);
+
+    boid.position += boid.velocity * deltaTime;
+
+    boids[id.x] = boid;
 }
+
+

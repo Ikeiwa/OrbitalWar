@@ -69,8 +69,8 @@ public class MidiFileInspector
 							{
 								noteOn.Tempo = MidiFile.DeltaTicksPerQuarterNote * _tempoEvents.Last(a => a.AbsoluteTime <= t_note.AbsoluteTime).BPM / 60;
 							}
-							catch (Exception e)
-							{
+							catch (Exception)
+                            {
 								noteOn.Tempo = MidiFile.DeltaTicksPerQuarterNote * defaultTempo / 60;
 							}
 						}

@@ -631,11 +631,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77535b7fe341e1242a728b4391e8ac27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidPrefab: {fileID: 5540033549740690448, guid: 621b71a37ab0fb54ebd1088bd4c6fdfe, type: 3}
-  settings: {fileID: 11400000, guid: 5813b612ce9eebb45a026c9b5f09e340, type: 2}
+  boidPrefab: {fileID: 1019059984485111445, guid: 621b71a37ab0fb54ebd1088bd4c6fdfe, type: 3}
   shader: {fileID: 7200000, guid: 02f18f58b90722c4396bf3a797b43964, type: 3}
   boidsCount: 50
-  boids: []
+  target: {fileID: 0}
+  settings:
+    minSpeed: 1
+    maxSpeed: 3
+    perceptionRadius: 5
+    avoidanceRadius: 0.5
+    maxSteerForce: 3
+    alignWeight: 2
+    cohesionWeight: 2.5
+    seperateWeight: 4
+    targetWeight: 10
+    obstacleMask:
+      serializedVersion: 2
+      m_Bits: 1088
+    boundsRadius: 0.27
+    avoidCollisionWeight: 10
+    collisionAvoidDst: 5
 --- !u!4 &790744614
 Transform:
   m_ObjectHideFlags: 0
@@ -683,6 +698,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc25b149689ac5e4f9ceecfc027802ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  graph: []
   previewNodeMesh: {fileID: 289301614986012343, guid: c8a0da232dc95d546a8f9c7e9fdde371, type: 3}
   previewLinkMesh: {fileID: -462981019419857548, guid: 37fba9e67a68fa1449a593b8f3df70ce, type: 3}
   searchMode: 1
@@ -1114,6 +1130,7 @@ MonoBehaviour:
   OnBeat:
     m_PersistentCalls:
       m_Calls: []
+  notes: []
 --- !u!1 &1750756390
 GameObject:
   m_ObjectHideFlags: 0

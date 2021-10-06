@@ -87,7 +87,11 @@ public class MusicManager : MonoBehaviour
         {
             beat = beatTime%1;
             OnBeat.Invoke();
-            Debug.Log("BEAT");
         }
+
+        Shader.SetGlobalFloat("_MusicEnergy", energy);
+        Shader.SetGlobalFloat("_MusicBeatTime", beatTime);
+        Shader.SetGlobalFloat("_MusicBeat", beat);
+        Shader.SetGlobalFloatArray("_MusicSpectrum", spectrum);
     }
 }
