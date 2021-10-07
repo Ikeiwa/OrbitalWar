@@ -20,7 +20,6 @@ float maxSpeed = 5;
 float perceptionRadius = 2.5f;
 float avoidanceRadius = 1;
 float maxSteerForce = 3;
-float maxSceneDistance = 20;
 
 float alignWeight = 1;
 float cohesionWeight = 1;
@@ -37,10 +36,6 @@ float3 target;
 float3 Steer(float3 dir, Boid boid){
     float3 v = normalize(dir) * maxSpeed - boid.velocity;
     return normalize(v) * min(length(v),maxSteerForce);
-}
-
-float lengthSqrt(float3 vec){
-    return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
 [numthreads(threadGroupSize,1,1)]
@@ -62,7 +57,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             Boid other = boids[i];
 
             float3 offset = other.position - boid.position;
-            float distance = lengthSqrt(offset);
+            float distance = offset.x*offset.x + offset.y*offset.y + offset.z*offset.z;
 
             if(distance < perceptionRadius*perceptionRadius){
                 flockMates+=1;
@@ -99,10 +94,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     boid.velocity = normalize(boid.velocity) * max(min(length(boid.velocity),maxSpeed),minSpeed);
 
     boid.position += boid.velocity * deltaTime;
-
-    if(lengthSqrt(boid.position)>maxSceneDistance*maxSceneDistance){
-        boid.position = -boid.position;
-    }
 
     boids[id.x] = boid;
 }

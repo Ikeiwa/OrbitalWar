@@ -20,6 +20,7 @@ public class Player : MonoBehaviour, IDamageable
     public Vector3 firePos;
 
     public float damageTimer = 0;
+    private Vector3 inputDir;
 
     public void ApplyDamage(float damages)
     {
@@ -45,8 +46,10 @@ public class Player : MonoBehaviour, IDamageable
 
     private void FixedUpdate()
     {
-        Vector3 inputDir = Vector3.ClampMagnitude(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")), 1);
+        
         controller.Move(inputDir);
+
+        
     }
 
     // Update is called once per frame
@@ -59,6 +62,8 @@ public class Player : MonoBehaviour, IDamageable
 
         head.LookAt(firePos, transform.up);
 
+        inputDir = Vector3.ClampMagnitude(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")), 1);
+
         if (Input.GetMouseButtonDown(0))
         {
             foreach(Transform firePoint in firePoints)
@@ -69,6 +74,14 @@ public class Player : MonoBehaviour, IDamageable
             }
             audioSource.pitch = Random.Range(0.95f, 1.05f);
             audioSource.PlayOneShot(fireSound, Random.Range(0.95f, 1.05f));
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            float timing = MusicManager.beat - 0.15f;
+            Debug.Log(timing);
+            if(timing > 0.75f || timing < 0.25f)
+                controller.AddImpulse(inputDir * 50);
         }
     }
 }

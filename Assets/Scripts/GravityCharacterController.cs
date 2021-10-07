@@ -16,6 +16,9 @@ public class GravityCharacterController : MonoBehaviour
     private Vector3 inputDir;
     private Vector3 gravity = Vector3.up;
 
+    private bool dash = false;
+    private Vector3 dashForce = Vector3.zero;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -36,6 +39,11 @@ public class GravityCharacterController : MonoBehaviour
         Vector3 move = direction * moveSpeed * Time.deltaTime;
         //rigidbody.MovePosition(transform.position + move);
         rigidbody.AddForce(move*10, ForceMode.Force);
+        if (dash)
+        {
+            dash = false;
+            rigidbody.AddForce(dashForce, ForceMode.VelocityChange);
+        }
         Debug.DrawRay(transform.position + transform.up * 0.25f, direction * 2,Color.green);
     }
 
@@ -85,6 +93,13 @@ public class GravityCharacterController : MonoBehaviour
     public void Move(Vector3 direction)
     {
         inputDir = direction;
+        
+    }
+
+    public void AddImpulse(Vector3 direction)
+    {
+        dash = true;
+        dashForce = direction;
     }
 
     public static Vector3 GetSmoothedNormal(RaycastHit hit)

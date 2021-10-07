@@ -90,11 +90,11 @@ public class BoidSettings
     public float perceptionRadius = 2.5f;
     public float avoidanceRadius = 1;
     public float maxSteerForce = 3;
-    public float maxSceneDistance = 20;
 
     public float alignWeight = 1;
     public float cohesionWeight = 1;
     public float seperateWeight = 1;
+
     public float targetWeight = 1;
 
     [Header("Collisions")]
@@ -140,15 +140,6 @@ public class BoidsFlock : MonoBehaviour
         }
     }
 
-    public void ResetBoids()
-    {
-        boids = new Boid[boidsCount];
-        for (int i = 0; i < boidsCount; i++)
-        {
-            boids[i].Init(settings.minSpeed, settings.maxSpeed);
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -165,14 +156,13 @@ public class BoidsFlock : MonoBehaviour
 
             shader.SetBuffer(0, "boids", boidBuffer);
             shader.SetInt("boidsCount", boids.Length);
-            shader.SetFloat("deltaTime", Time.deltaTime * MusicManager.energy);
+            shader.SetFloat("deltaTime", Time.deltaTime);
 
             shader.SetFloat("minSpeed", settings.minSpeed);
             shader.SetFloat("maxSpeed", settings.maxSpeed);
             shader.SetFloat("perceptionRadius", settings.perceptionRadius);
             shader.SetFloat("avoidanceRadius", settings.avoidanceRadius);
             shader.SetFloat("maxSteerForce", settings.maxSteerForce);
-            shader.SetFloat("maxSceneDistance", settings.maxSceneDistance);
             shader.SetFloat("alignWeight", settings.alignWeight);
             shader.SetFloat("cohesionWeight", settings.cohesionWeight);
             shader.SetFloat("seperateWeight", settings.seperateWeight);
