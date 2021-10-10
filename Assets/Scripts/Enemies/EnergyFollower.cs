@@ -6,6 +6,7 @@ using UnityEngine;
 public class EnergyFollower : Enemy
 {
     public GameObject explosionPrefab;
+    public AudioClip deathClip;
     public float speed = 1;
     public float health = 20;
 
@@ -106,6 +107,7 @@ public class EnergyFollower : Enemy
     private void Explode()
     {
         Instantiate(explosionPrefab, transform.position, transform.rotation);
+        AudioSource.PlayClipAtPoint(deathClip, transform.position);
         Destroy(gameObject);
     }
 }

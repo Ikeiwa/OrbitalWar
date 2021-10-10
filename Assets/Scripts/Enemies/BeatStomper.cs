@@ -9,6 +9,7 @@ public class BeatStomper : Enemy
 {
     public GameObject explosionPrefab;
     public Transform damageZone;
+    public AudioClip deathClip;
     public float health = 40;
 
 
@@ -55,6 +56,7 @@ public class BeatStomper : Enemy
     private void Explode()
     {
         Instantiate(explosionPrefab, transform.position, transform.rotation);
+        AudioSource.PlayClipAtPoint(deathClip, transform.position);
         Destroy(gameObject);
     }
 }

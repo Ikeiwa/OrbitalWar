@@ -633,7 +633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: 1019059984485111445, guid: 621b71a37ab0fb54ebd1088bd4c6fdfe, type: 3}
   shader: {fileID: 7200000, guid: 02f18f58b90722c4396bf3a797b43964, type: 3}
-  boidsCount: 1000
+  boidsCount: 500
   target: {fileID: 0}
   settings:
     minSpeed: 1
@@ -728,6 +728,7 @@ MonoBehaviour:
   enemies:
   - {fileID: 6693924917371670249, guid: a014371e20d5a5c4981949edb5fa6f9a, type: 3}
   - {fileID: -2769081951888819973, guid: eeed28be8ae0854418a9b0dbf6059c2d, type: 3}
+  - {fileID: 4926900802590039755, guid: b6dad94d517026349929024693c98000, type: 3}
 --- !u!4 &1112027307
 Transform:
   m_ObjectHideFlags: 0

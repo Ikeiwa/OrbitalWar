@@ -234,6 +234,17 @@ public class PathFinder : MonoBehaviour
         return closest;
     }
 
+    public static float GetPathLengthSqrt(List<Node> path)
+    {
+        float length = 0;
+        for (int i = 0; i < path.Count-1; i++)
+        {
+            length += (path[i + 1].position - path[i].position).sqrMagnitude;
+        }
+
+        return length;
+    }
+
     public IEnumerator GetShortestPath(Node start, Node end, System.Action<List<Node>> callback, int type = 0)
     {
         switch (searchMode)

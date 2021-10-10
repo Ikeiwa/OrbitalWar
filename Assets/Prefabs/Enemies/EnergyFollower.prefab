@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionPrefab: {fileID: 1449630657487120248, guid: 47df5173d632ef34491fb1fcd8536240, type: 3}
+  deathClip: {fileID: 8300000, guid: 6a86e21e0a560054dbdf3f1746a6cec2, type: 3}
   speed: 1
   health: 20
 --- !u!135 &5272650336196291783
