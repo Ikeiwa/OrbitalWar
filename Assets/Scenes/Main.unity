@@ -633,7 +633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: 1019059984485111445, guid: 621b71a37ab0fb54ebd1088bd4c6fdfe, type: 3}
   shader: {fileID: 7200000, guid: 02f18f58b90722c4396bf3a797b43964, type: 3}
-  boidsCount: 500
+  boidsCount: 1000
   target: {fileID: 0}
   settings:
     minSpeed: 1

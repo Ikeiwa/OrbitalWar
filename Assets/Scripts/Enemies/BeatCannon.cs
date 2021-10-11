@@ -27,7 +27,6 @@ public class BeatCannon : Enemy
     List<PathFinder.Node> path;
     int currentNode = 1;
     private State currentState = State.Idle;
-    private float stateTimer = 0;
     private float playerDistance = float.MaxValue;
 
     Player player;
@@ -149,6 +148,13 @@ public class BeatCannon : Enemy
                 foreach (PathFinder.Node node in path)
                     positions.Add(node.position);
 
+                if (playerDistance < fireDistance)
+                    lineRenderer.startColor = lineRenderer.endColor = Color.red;
+                else if (playerDistance < awareDistance)
+                    lineRenderer.startColor = lineRenderer.endColor = Color.yellow;
+                else
+                    lineRenderer.startColor = lineRenderer.endColor = Color.green;
+
                 lineRenderer.positionCount = positions.Count;
                 lineRenderer.SetPositions(positions.ToArray());
             }
@@ -176,11 +182,11 @@ public class BeatCannon : Enemy
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position,awareDistance);
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, fireDistance);
+        Gizmos.DrawWireSphere(transform.position,awareDistance);
         Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, fireDistance);
+        Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position,lostDistance);
     }
 }
