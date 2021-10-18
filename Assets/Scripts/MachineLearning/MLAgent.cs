@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,9 @@ public class MLAgent : MonoBehaviour
     public class NeuralConnection
     {
         public Neuron neuron;
-        public float weight = 1;
+        public float weight = 0.5f;
 
-        public NeuralConnection(Neuron neuron, float weight)
+        public NeuralConnection(Neuron neuron, float weight = 0.5f)
         {
             this.neuron = neuron;
             this.weight = weight;
@@ -31,6 +32,19 @@ public class MLAgent : MonoBehaviour
         public void AddInput(Neuron neuron)
         {
             Inputs.Add(new NeuralConnection(neuron,1));
+        }
+
+        public void Update()
+        {
+            float result = 0;
+            foreach (var input in Inputs)
+            {
+                result += input.neuron.value * input.weight;
+            }
+
+            result *= bias;
+
+            value = 1 / (1 + Mathf.Exp(-result));
         }
     }
 
@@ -90,14 +104,35 @@ public class MLAgent : MonoBehaviour
             }
         }
 
+        public void Update()
+        {
+            foreach (var layer in network)
+            {
+                for (int n = 0; n < network.Count; n++)
+                {
+                    layer[n].Update();
+                }
+            }
+
+            foreach (var output in outputs.Values)
+            {
+                output.Update();
+            }
+        }
+
         public void Mutate(float percent)
         {
-
+            
         }
 
         public NeuralNetwork MakeChild(NeuralNetwork other, float ratio = 0.5f)
         {
             return null;
+        }
+
+        public void Draw()
+        {
+            
         }
     }
 
@@ -112,4 +147,5 @@ public class MLAgent : MonoBehaviour
     {
         
     }
+    
 }
