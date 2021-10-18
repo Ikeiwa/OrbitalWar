@@ -5,16 +5,40 @@ using UnityEngine;
 
 public class MLAgent : MonoBehaviour
 {
+    public class NeuralConnection
+    {
+        public Neuron neuron;
+        public float weight = 1;
+
+        public NeuralConnection(Neuron neuron, float weight)
+        {
+            this.neuron = neuron;
+            this.weight = weight;
+        }
+    }
+
     public class Neuron
     {
+        public List<NeuralConnection> Inputs;
+        public float bias = 1;
+        public float value = 0;
 
+        public Neuron()
+        {
+            Inputs = new List<NeuralConnection>();
+        }
+
+        public void AddInput(Neuron neuron)
+        {
+            Inputs.Add(new NeuralConnection(neuron,1));
+        }
     }
 
     public class NeuralNetwork
     {
         public readonly List<List<Neuron>> network;
-        public readonly Dictionary<string, int> inputs;
-        public readonly Dictionary<string, int> outputs;
+        public readonly Dictionary<string, Neuron> inputs;
+        public readonly Dictionary<string, Neuron> outputs;
 
         public NeuralNetwork(int hiddenLayers = 3, int neuronsPerLayer = 4)
         {
@@ -28,20 +52,42 @@ public class MLAgent : MonoBehaviour
                 }
             }
 
-            inputs = new Dictionary<string, int>();
-            outputs = new Dictionary<string, int>();
+            for (int i = 1; i < hiddenLayers; i++)
+            {
+                network.Add(new List<Neuron>());
+                for (int n = 1; n < network[i].Count; n++)
+                {
+                    for (int p = 1; p < network[i].Count; p++)
+                    {
+                        network[i][n].AddInput(network[i-1][p]);
+                    }
+                }
+            }
+
+            inputs = new Dictionary<string, Neuron>();
+            outputs = new Dictionary<string, Neuron>();
         }
 
         public void AddInput(string name)
         {
-            inputs.Add(name,network[0].Count);
-            network[0].Add(new Neuron());
+            Neuron input = new Neuron();
+            inputs.Add(name,input);
+
+            foreach (var neuron in network[0])
+            {
+                neuron.AddInput(input);
+            }
         }
 
         public void AddOutput(string name)
         {
-            outputs.Add(name,network.Last().Count);
-            network.Last().Add(new Neuron());
+            Neuron output = new Neuron();
+            outputs.Add(name,output);
+
+            foreach (var neuron in network.Last())
+            {
+                output.AddInput(neuron);
+            }
         }
 
         public void Mutate(float percent)
