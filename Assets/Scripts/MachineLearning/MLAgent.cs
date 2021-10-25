@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MLAgent : MonoBehaviour
 {
@@ -46,16 +47,48 @@ public class MLAgent : MonoBehaviour
 
             value = 1 / (1 + Mathf.Exp(-result));
         }
+
+        public void Copy(Neuron other)
+        {
+            for (int i = 0; i < Inputs.Count && i < other.Inputs.Count; i++)
+            {
+                Inputs[i].weight = other.Inputs[i].weight;
+            }
+
+            bias = other.bias;
+        }
+
+        public void Mutate(float percent)
+        {
+            foreach (var input in Inputs)
+            {
+                if (Random.value < percent)
+                {
+                    input.weight = Random.Range(-1, 1);
+                }
+            }
+
+            if (Random.value < percent)
+            {
+                bias += Random.Range(-0.05f, 0.05f);
+            }
+        }
     }
 
     public class NeuralNetwork
     {
-        public readonly List<List<Neuron>> network;
-        public readonly Dictionary<string, Neuron> inputs;
-        public readonly Dictionary<string, Neuron> outputs;
+        public List<List<Neuron>> network;
+        public Dictionary<string, Neuron> inputs;
+        public Dictionary<string, Neuron> outputs;
+
+        public readonly int hiddenLayers = 3;
+        public readonly int neuronsPerLayer = 4;
 
         public NeuralNetwork(int hiddenLayers = 3, int neuronsPerLayer = 4)
         {
+            this.hiddenLayers = hiddenLayers;
+            this.neuronsPerLayer = neuronsPerLayer;
+
             network = new List<List<Neuron>>();
             for (int i = 0; i < hiddenLayers; i++)
             {
@@ -122,12 +155,32 @@ public class MLAgent : MonoBehaviour
 
         public void Mutate(float percent)
         {
-            
+            foreach (var layer in network)
+            {
+                for (int n = 0; n < network.Count; n++)
+                {
+                    layer[n].Mutate(percent);
+                }
+            }
         }
 
         public NeuralNetwork MakeChild(NeuralNetwork other, float ratio = 0.5f)
         {
-            return null;
+            NeuralNetwork child = new NeuralNetwork(hiddenLayers, neuronsPerLayer);
+            foreach (var input in inputs.Keys) { child.AddInput(input); }
+            foreach (var output in outputs.Keys) { child.AddOutput(output); }
+
+            for (int l=0;l<child.network.Count;l++)
+            {
+                for (int n = 0; n < child.network.Count; n++)
+                {
+                    bool useThis = Random.value < ratio;
+
+                    child.network[l][n].Copy(useThis ? network[l][n] : other.network[l][n]);
+                }
+            }
+
+            return child;
         }
 
         public void Draw()

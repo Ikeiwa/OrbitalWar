@@ -16,6 +16,7 @@ Tirez sur des dizaines d'ennemies en rythme dans tout les sens !
  - Recherche chemin : Scripts/Levels/PathFinder.cs
  - Boids : Scripts/Boids/
  - StateMachine : Scripts/Enemies/BeatCannon.cs
+ - Génétique et réseau de neurones : Scripts/MachineLearning
 
 ## Démo
 
