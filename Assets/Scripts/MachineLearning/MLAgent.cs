@@ -27,12 +27,13 @@ public class Neuron
     public Neuron()
     {
         Inputs = new List<NeuralConnection>();
-        bias = Random.Range(0, 1);
+        bias = Random.value;
     }
 
     public void AddInput(Neuron neuron)
     {
-        Inputs.Add(new NeuralConnection(neuron, Random.Range(0,1)));
+        float weight = Random.Range(-1f,1f);
+        Inputs.Add(new NeuralConnection(neuron, weight));
     }
 
     public void Update()
@@ -45,7 +46,7 @@ public class Neuron
 
         result *= bias;
 
-        value = 1 / (1 + Mathf.Exp(-result));
+        value = 1f / (1f + Mathf.Exp(-result));
     }
 
     public void Copy(Neuron other)
@@ -64,7 +65,7 @@ public class Neuron
         {
             if (Random.value < percent)
             {
-                input.weight = Random.Range(-1, 1);
+                input.weight = Random.Range(-1f, 1f);
             }
         }
 
@@ -93,21 +94,17 @@ public class NeuralNetwork
         for (int i = 0; i < hiddenLayers; i++)
         {
             network.Add(new List<Neuron>());
-            for (int n = 1; n < neuronsPerLayer; n++)
+            for (int n = 0; n < neuronsPerLayer; n++)
             {
                 network[i].Add(new Neuron());
-            }
-        }
-
-        for (int i = 1; i < hiddenLayers; i++)
-        {
-            network.Add(new List<Neuron>());
-            for (int n = 1; n < network[i].Count; n++)
-            {
-                for (int p = 1; p < network[i].Count; p++)
+                if (i > 0)
                 {
-                    network[i][n].AddInput(network[i - 1][p]);
+                    for (int p = 1; p < network[i].Count; p++)
+                    {
+                        network[i][n].AddInput(network[i-1][p]);
+                    }
                 }
+                
             }
         }
 
@@ -154,7 +151,7 @@ public class NeuralNetwork
     {
         foreach (var layer in network)
         {
-            for (int n = 0; n < network.Count; n++)
+            for (int n = 0; n < layer.Count; n++)
             {
                 layer[n].Update();
             }
@@ -198,12 +195,36 @@ public class NeuralNetwork
 
     public void Draw()
     {
+        int i = 0;
+        foreach (var input in inputs.Values)
+        {
+            GUI.Label(new Rect(10, i*40+10, 50, 50),input.value.ToString("0.00"));
+            i++;
+        }
 
+        for (int l=0;l< network.Count;l++)
+        {
+            for (int n = 0; n < network[l].Count; n++)
+            {
+                
+                GUI.Label(new Rect((l+1)*40+10, n * 40 + 10, 50, 50), network[l][n].value.ToString("0.00"));
+            }
+        }
+
+        i = 0;
+        foreach (var output in outputs.Values)
+        {
+            GUI.Label(new Rect((network.Count+1)*40+10,i * 40 + 10, 50, 50), output.value.ToString("0.00"));
+            i++;
+        }
+
+        
     }
 }
 
 public class MLAgent : MonoBehaviour
 {
+    public GameObject model;
     public NeuralNetwork network;
     public float score = 0;
     public bool dead = false;
@@ -213,6 +234,10 @@ public class MLAgent : MonoBehaviour
         network = new NeuralNetwork();
     }
 
+    public virtual void CalculateScore(){
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -220,9 +245,17 @@ public class MLAgent : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public virtual void UpdateAgent()
     {
         
     }
-    
+
+    public void Draw()
+    {
+        GUI.color = Color.red;
+        network.Draw();
+
+        GUI.color = Color.cyan;
+        GUI.Label(new Rect(Screen.width-50, 10, 50, 50), score.ToString("0.00"));
+    }
 }

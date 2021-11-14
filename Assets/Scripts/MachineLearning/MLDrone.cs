@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class MLDrone : MLAgent
 {
-    private Vector3 velocity;
+    public Vector3 velocity;
 
     public override void GenerateNetwork()
     {
         network = new NeuralNetwork(5, 8);
+        //network = new NeuralNetwork(1, 1);
         network.AddInput("Dist forward");
         network.AddInput("Dist up");
         network.AddInput("Dist down");
@@ -19,6 +20,11 @@ public class MLDrone : MLAgent
         network.AddOutput("Fly up");
         network.AddOutput("Fly forward");
         network.AddOutput("Turn");
+    }
+
+    public override void CalculateScore()
+    {
+        score = transform.localPosition.z;
     }
 
     // Start is called before the first frame update
@@ -38,7 +44,7 @@ public class MLDrone : MLAgent
     }
 
     // Update is called once per frame
-    void Update()
+    public override void UpdateAgent()
     {
         if (!dead)
         {
@@ -56,12 +62,15 @@ public class MLDrone : MLAgent
 
             network.Update();
 
-            float flyUp = Mathf.Clamp01(network.GetOutput("Fly up"));
-            float flyForward = Mathf.Clamp01(network.GetOutput("Fly forward"));
-            float turn = Mathf.Clamp01(network.GetOutput("Turn"));
+            float flyUp = Mathf.Clamp01(network.GetOutput("Fly up"))*2-1;
+            float flyForward = Mathf.Clamp01(network.GetOutput("Fly forward"))*2-1;
+            float turn = Mathf.Clamp01(network.GetOutput("Turn"))*2-1;
 
-
-
+            velocity *= 0.9f;
+            velocity += transform.up * flyUp * 0.01f;
+            velocity += transform.forward * flyForward * 0.01f;
+            velocity = Vector3.ClampMagnitude(velocity, 0.2f);
+            transform.Rotate(Vector3.up * turn);
 
             transform.position += velocity;
         }
