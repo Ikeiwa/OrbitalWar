@@ -49,6 +49,10 @@ public class MLManager : MonoBehaviour
         {
             int father = Random.Range(0, selectedTop);
             int mother = Random.Range(0, selectedTop);
+            while (father == mother)
+            {
+                mother = Random.Range(0, selectedTop);
+            }
 
             agents[c].network = agents[mother].network.MakeChild(agents[father].network);
         }

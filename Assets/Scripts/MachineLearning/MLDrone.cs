@@ -9,7 +9,7 @@ public class MLDrone : MLAgent
 
     public override void GenerateNetwork()
     {
-        network = new NeuralNetwork(2, 5);
+        network = new NeuralNetwork(5, 8);
         //network = new NeuralNetwork(1, 1);
         network.AddInput("Dist forward");
         network.AddInput("Dist up");
