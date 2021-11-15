@@ -57,7 +57,7 @@ public class MLManager : MonoBehaviour
         {
             agents[i].transform.localPosition = Vector3.zero;
             agents[i].transform.localRotation = Quaternion.identity;
-            agents[i].dead = false;
+            agents[i].Reset();
         }
 
         generation += 1;

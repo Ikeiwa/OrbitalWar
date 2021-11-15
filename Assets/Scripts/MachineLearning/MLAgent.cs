@@ -238,6 +238,11 @@ public class MLAgent : MonoBehaviour
 
     }
 
+    public virtual void Reset()
+    {
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {
