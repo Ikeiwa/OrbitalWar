@@ -46,7 +46,7 @@ public class Neuron
 
         result *= bias;
 
-        value = 1f / (1f + Mathf.Exp(-result));
+        value = (1f / (1f + Mathf.Exp(-result*5)))*2-1;
     }
 
     public void Copy(Neuron other)

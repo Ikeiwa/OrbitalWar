@@ -2289,9 +2289,9 @@ MonoBehaviour:
   agentPrefab: {fileID: 5463232842209465132, guid: a501a6aa26f4b5a4daa9fcb02732d506, type: 3}
   spawnPoint: {fileID: 2069570069}
   updateRate: 0
-  nbAgents: 50
-  selectedTop: 10
-  mutationRate: 0.02
+  nbAgents: 100
+  selectedTop: 20
+  mutationRate: 0.1
   maxGenDuration: 2400
   agents: []
   generation: 0

@@ -22,6 +22,8 @@ public class MLManager : MonoBehaviour
     public int selectedAgent = 0;
     public bool showOnlySelected = false;
 
+    private float bestFitness = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,7 +40,10 @@ public class MLManager : MonoBehaviour
 
     public void AdvanceGeneration()
     {
+        ChangeSelectedAgent(0);
         agents = agents.OrderByDescending(a => a.score).ToList();
+
+        bestFitness = agents[0].score;
 
         for (int c = selectedTop; c < nbAgents; c++)
         {
@@ -126,7 +131,7 @@ public class MLManager : MonoBehaviour
         if (showOnlySelected)
         {
             agents[selectedAgent].model.SetActive(false);
-            agents[agent].model.SetActive(false);
+            agents[agent].model.SetActive(true);
         }
 
         selectedAgent = agent;
@@ -135,5 +140,8 @@ public class MLManager : MonoBehaviour
     private void OnGUI()
     {
         agents[selectedAgent].Draw();
+        
+        GUI.Label(new Rect(Screen.width - 50, 30, 50, 50), generation.ToString());
+        GUI.Label(new Rect(Screen.width - 80, 30, 50, 50), bestFitness.ToString("0.00"));
     }
 }

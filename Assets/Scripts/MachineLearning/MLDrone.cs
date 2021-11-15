@@ -9,7 +9,7 @@ public class MLDrone : MLAgent
 
     public override void GenerateNetwork()
     {
-        network = new NeuralNetwork(5, 8);
+        network = new NeuralNetwork(2, 5);
         //network = new NeuralNetwork(1, 1);
         network.AddInput("Dist forward");
         network.AddInput("Dist up");
@@ -18,7 +18,7 @@ public class MLDrone : MLAgent
         network.AddInput("Dist right");
 
         network.AddOutput("Fly up");
-        network.AddOutput("Fly forward");
+        //network.AddOutput("Fly forward");
         network.AddOutput("Turn");
     }
 
@@ -65,12 +65,13 @@ public class MLDrone : MLAgent
             network.Update();
 
             float flyUp = Mathf.Clamp01(network.GetOutput("Fly up"))*2-1;
-            float flyForward = Mathf.Clamp01(network.GetOutput("Fly forward"))*2-1;
+            //float flyForward = Mathf.Clamp01(network.GetOutput("Fly forward"))*2-1;
             float turn = Mathf.Clamp01(network.GetOutput("Turn"))*2-1;
 
             velocity *= 0.9f;
             velocity += transform.up * flyUp * 0.01f;
-            velocity += transform.forward * flyForward * 0.01f;
+            //velocity += transform.forward * flyForward * 0.01f;
+            velocity += transform.forward * 0.005f;
             velocity += transform.right * turn * 0.01f;
             velocity = Vector3.ClampMagnitude(velocity, 0.2f);
             //transform.Rotate(Vector3.up * turn);
