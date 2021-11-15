@@ -59,6 +59,19 @@ public class Neuron
         bias = other.bias;
     }
 
+    public void CopyParents(Neuron father,Neuron mother)
+    {
+        Neuron other = Random.value > 0.5f ? father : mother;
+
+        for (int i = 0; i < Inputs.Count && i < father.Inputs.Count; i++)
+        {
+            Inputs[i].weight = other.Inputs[i].weight;
+        }
+
+        other = Random.value > 0.5f ? father : mother;
+        bias = other.bias;
+    }
+
     public void Mutate(float percent)
     {
         foreach (var input in Inputs)
@@ -184,9 +197,7 @@ public class NeuralNetwork
         {
             for (int n = 0; n < child.network.Count; n++)
             {
-                bool useThis = Random.value < ratio;
-
-                child.network[l][n].Copy(useThis ? network[l][n] : other.network[l][n]);
+                child.network[l][n].CopyParents(network[l][n],other.network[l][n]);
             }
         }
 
