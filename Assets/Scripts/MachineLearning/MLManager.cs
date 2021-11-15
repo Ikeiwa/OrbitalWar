@@ -118,6 +118,11 @@ public class MLManager : MonoBehaviour
                 agent.dead = true;
         }
 
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            updateRate = (updateRate == 60) ? 0 : 60;
+        }
+
         cam.transform.position = agents[selectedAgent].transform.position;
     }
 
@@ -142,6 +147,6 @@ public class MLManager : MonoBehaviour
         agents[selectedAgent].Draw();
         
         GUI.Label(new Rect(Screen.width - 50, 30, 50, 50), generation.ToString());
-        GUI.Label(new Rect(Screen.width - 80, 30, 50, 50), bestFitness.ToString("0.00"));
+        GUI.Label(new Rect(Screen.width - 50, 60, 50, 50), bestFitness.ToString("0.00"));
     }
 }
