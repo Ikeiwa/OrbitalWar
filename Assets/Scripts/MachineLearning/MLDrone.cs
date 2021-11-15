@@ -35,6 +35,8 @@ public class MLDrone : MLAgent
 
     private float RayDistance(Vector3 dir)
     {
+        Debug.DrawRay(transform.position,dir.normalized*5);
+
         if (Physics.Raycast(transform.position, dir.normalized, out RaycastHit hit, 5, 1 << 0))
         {
             return hit.distance / 5;
@@ -69,15 +71,21 @@ public class MLDrone : MLAgent
             velocity *= 0.9f;
             velocity += transform.up * flyUp * 0.01f;
             velocity += transform.forward * flyForward * 0.01f;
+            velocity += transform.right * turn * 0.01f;
             velocity = Vector3.ClampMagnitude(velocity, 0.2f);
-            transform.Rotate(Vector3.up * turn);
+            //transform.Rotate(Vector3.up * turn);
 
             transform.position += velocity;
+
+            if (Physics.OverlapSphereNonAlloc(transform.position, 0.09f, new Collider[1], 1 << 0) > 0)
+            {
+                dead = true;
+            }
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*private void OnTriggerEnter(Collider other)
     {
         dead = true;
-    }
+    }*/
 }       
